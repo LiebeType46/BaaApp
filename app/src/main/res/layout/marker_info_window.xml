@@ -1,0 +1,42 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:background="@android:drawable/dialog_holo_light_frame">
+
+    <TextView
+        android:id="@+id/info_category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="カテゴリ"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/info_latlon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="緯度経度"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/info_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="時刻" />
+
+    <TextView
+        android:id="@+id/info_memo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="メモ" />
+
+    <ImageView
+        android:id="@+id/info_image"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:layout_marginTop="4dp"
+        android:onClick="onTumbnailClick"/>
+</LinearLayout>
