@@ -74,16 +74,17 @@ public class CsvImporter {
 
     private LocationEntity toEntity(String line) {
         String[] cols = smartCsvSplit(line);
-        if (cols.length != 6) return null;
+        if (cols.length != 7) return null;
         try {
             // 各値に trim() を追加
             String category = cols[0].trim();
-            double lat = Double.parseDouble(cols[1].trim());
-            double lon = Double.parseDouble(cols[2].trim());
-            String timestamp = cols[3].trim();
-            String memo = cols[4].trim();
-            String photoPath = cols[5].trim();
-            return new LocationEntity(category, lat, lon, timestamp, memo, photoPath);
+            String subCategory = cols[1].trim();
+            double lat = Double.parseDouble(cols[2].trim());
+            double lon = Double.parseDouble(cols[3].trim());
+            String timestamp = cols[4].trim();
+            String memo = cols[5].trim();
+            String photoPath = cols[6].trim();
+            return new LocationEntity(category, subCategory, lat, lon, timestamp, memo, photoPath);
         } catch (Exception e) {
             Log.w("CsvImporter", "変換失敗: " + line);
             return null;

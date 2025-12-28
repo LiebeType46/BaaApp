@@ -42,10 +42,10 @@ public class MenuService {
 
             if (context instanceof android.app.Activity) {
                 ((android.app.Activity) context).startActivityForResult(
-                        Intent.createChooser(intent, "CSV ファイルを選択"), REQUEST_CODE_IMPORT_CSV
+                        Intent.createChooser(intent, context.getString(R.string.select_file)), REQUEST_CODE_IMPORT_CSV
                 );
             } else {
-                Toast.makeText(context, "インポートはアクティビティからのみ実行可能です", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.warn_import), Toast.LENGTH_SHORT).show();
             }
         } else if (itemId == R.id.menu_item3) {
             Toast.makeText(context, "Option 3 Selected", Toast.LENGTH_SHORT).show();

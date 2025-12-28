@@ -7,12 +7,16 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.example.baapp.MainActivity;
 import com.example.baapp.R;
@@ -26,10 +30,10 @@ import org.osmdroid.util.GeoPoint;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class DialogHelper {
 
@@ -42,6 +46,7 @@ public class DialogHelper {
     private final PhotoService photoService;
 
     private Spinner categorySpinner;
+    private EditText subCategoryField;
     private EditText latitudeField;
     private EditText longitudeField;
     private EditText timestampField;
@@ -65,23 +70,37 @@ public class DialogHelper {
 
         categorySpinner = dialogView.findViewById(R.id.categorySpinner);
 
-        // 表示用ラベルリストの作成
-        List<String> categoryLabels = new ArrayList<>();
-        for (MainCategory category : MainCategory.values()) {
-            categoryLabels.add(category.getLabel());
-        }
+        ArrayAdapter<MainCategory> adapter =
+                new ArrayAdapter<MainCategory>(
+                        context,
+                        android.R.layout.simple_spinner_item,
+                        MainCategory.values()
+                ) {
+                    @NonNull
+                    @Override
+                    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                        View view = super.getView(position, convertView, parent);
+                        TextView tv = (TextView) view;
+                        tv.setText(context.getString(Objects.requireNonNull(getItem(position)).getLabel()));
+                        return view;
+                    }
 
-        // Spinnerにアダプタを設定
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                context,  // ActivityやDialogのコンテキスト
-                android.R.layout.simple_spinner_item,
-                categoryLabels
-        );
+                    @Override
+                    public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
+                        View view = super.getDropDownView(position, convertView, parent);
+                        TextView tv = (TextView) view;
+                        tv.setText(context.getString(Objects.requireNonNull(getItem(position)).getLabel()));
+                        return view;
+                    }
+                };
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categorySpinner.setAdapter(adapter);
 
-        
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        subCategoryField = dialogView.findViewById(R.id.subCategoryEditText);
+
         latitudeField = dialogView.findViewById(R.id.latitudeField);
         longitudeField = dialogView.findViewById(R.id.longitudeField);
         timestampField = dialogView.findViewById(R.id.timestampField);
@@ -94,8 +113,8 @@ public class DialogHelper {
 
         initializeDialogFields();
 
-        builder.setPositiveButton("登録", (dialog, which) -> saveLocation());
-        builder.setNegativeButton("キャンセル", (dialog, which) -> dialog.dismiss());
+        builder.setPositiveButton(context.getString(R.string.btn_register), (dialog, which) -> saveLocation());
+        builder.setNegativeButton(context.getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
 
         builder.create().show();
     }
@@ -109,8 +128,8 @@ public class DialogHelper {
                 if (location != null) {
                     setLocationFields(location);
                 } else {
-                    latitudeField.setText("取得できませんでした");
-                    longitudeField.setText("取得できませんでした");
+                    latitudeField.setText(context.getString(R.string.error_fail_get));
+                    longitudeField.setText(context.getString(R.string.error_fail_get));
                     timestampField.setText("");
                 }
             });
@@ -126,7 +145,11 @@ public class DialogHelper {
     }
 
     private void saveLocation() {
-        String category = categorySpinner.getSelectedItem().toString();
+        MainCategory selected =
+                (MainCategory) categorySpinner.getSelectedItem();
+        String category =
+                selected != null ? selected.getId() : MainCategory.DAILY.getId();
+        String subCategory = subCategoryField.getText().toString();
         String latStr = latitudeField.getText().toString();
         String lonStr = longitudeField.getText().toString();
         String timestamp = timestampField.getText().toString();
@@ -137,8 +160,8 @@ public class DialogHelper {
             double latitude = Double.parseDouble(latStr);
             double longitude = Double.parseDouble(lonStr);
 
-            locationService.saveLocation(category, latStr, lonStr, timestamp, memo, uriStr);
-            Toast.makeText(context, "登録しました: " + memo, Toast.LENGTH_SHORT).show();
+            locationService.saveLocation(category, subCategory, latStr, lonStr, timestamp, memo, uriStr);
+            Toast.makeText(context, R.string.complete_register + memo, Toast.LENGTH_SHORT).show();
 
             if (context instanceof MainActivity) {
                 GeoPoint lastLocation = locationService.getLastKnownLocation(context);
@@ -148,18 +171,18 @@ public class DialogHelper {
 
 
         } catch (NumberFormatException e) {
-            Toast.makeText(context, "有効な位置情報を入力してください。", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.error_invalid_location, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, "登録に失敗しました。", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, R.string.error_fail_register, Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showPhotoOptionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        String[] options = {"写真を撮影", "画像を選択", "キャンセル"};
+        String[] options = {context.getString(R.string.take_photo), context.getString(R.string.select_picture), context.getString(R.string.cancel)};
 
-        builder.setTitle("写真を追加")
+        builder.setTitle(context.getString(R.string.add_picture))
                 .setItems(options, (dialog, which) -> {
                     switch (which) {
                         case 0:
@@ -176,15 +199,15 @@ public class DialogHelper {
                                             photoPreview.setVisibility(View.VISIBLE);
                                             photoPreview.setImageBitmap(thumbnail);
                                         } else {
-                                            Toast.makeText(context, "画像の読み込みに失敗しました", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, R.string.error_read_picture, Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (IOException e) {
                                         e.printStackTrace();
-                                        Toast.makeText(context, "画像の処理中にエラーが発生しました", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, R.string.error_process_picture, Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             } catch (IOException e) {
-                                Toast.makeText(context, "カメラ起動に失敗しました", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, R.string.error_launch_camera, Toast.LENGTH_SHORT).show();
                             }
 
                             break;
@@ -201,11 +224,11 @@ public class DialogHelper {
                                         photoPreview.setVisibility(View.VISIBLE);
                                         photoPreview.setImageBitmap(thumbnail);
                                     } else {
-                                        Toast.makeText(context, "画像の読み込みに失敗しました", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, R.string.error_read_picture, Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (IOException e) {
                                     e.printStackTrace();
-                                    Toast.makeText(context, "画像の処理中にエラーが発生しました", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, R.string.error_process_picture, Toast.LENGTH_SHORT).show();
                                 }
                             });
                             break;

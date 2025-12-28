@@ -1,9 +1,7 @@
 package com.example.baapp.location;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -19,11 +17,9 @@ import androidx.core.app.ActivityCompat;
 
 import com.example.baapp.data.AppDatabase;
 import com.example.baapp.data.LocationEntity;
-import com.example.baapp.photo.PhotoService;
 
 import org.osmdroid.util.GeoPoint;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
@@ -78,7 +74,7 @@ public class LocationService {
                 boolean handled = false;
 
                 @Override
-                public void onLocationChanged(Location location) {
+                public void onLocationChanged(@NonNull Location location) {
                     if (!handled) {
                         handled = true;
                         locationManager.removeUpdates(this);
@@ -87,8 +83,8 @@ public class LocationService {
                 }
 
                 @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
-                @Override public void onProviderEnabled(String provider) {}
-                @Override public void onProviderDisabled(String provider) {}
+                @Override public void onProviderEnabled(@NonNull String provider) {}
+                @Override public void onProviderDisabled(@NonNull String provider) {}
             };
 
             locationManager.requestLocationUpdates(provider, 0, 0, listener);
@@ -122,9 +118,9 @@ public class LocationService {
         return null;
     }
 
-    public void saveLocation(String category, String latitude, String longitude, String timestamp, String memo, String photoPath) {
+    public void saveLocation(String category, String subCategory, String latitude, String longitude, String timestamp, String memo, String photoPath) {
         try {
-            LocationEntity locationEntity = createLocationEntity(category, latitude, longitude, timestamp, memo, photoPath);
+            LocationEntity locationEntity = createLocationEntity(category, subCategory, latitude, longitude, timestamp, memo, photoPath);
 
             db.locationDao().insert(locationEntity);
             Log.d("LocationService", "データが保存されました。");
@@ -135,10 +131,10 @@ public class LocationService {
         }
     }
 
-    private LocationEntity createLocationEntity(String cat, String latStr, String lonStr, String ts, String memo, String photoPath) {
+    private LocationEntity createLocationEntity(String cat, String subCat, String latStr, String lonStr, String ts, String memo, String photoPath) {
         double lat = Double.parseDouble(latStr);
         double lon = Double.parseDouble(lonStr);
-        return new LocationEntity(cat, lat, lon, ts, memo, photoPath);
+        return new LocationEntity(cat, subCat, lat, lon, ts, memo, photoPath);
     }
 
     public interface LocationCallback {

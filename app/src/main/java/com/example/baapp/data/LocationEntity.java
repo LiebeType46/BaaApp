@@ -16,8 +16,9 @@ public class LocationEntity {
     private String timestamp;
     private String memo;
 
-    public LocationEntity(String category, double latitude, double longitude, String timestamp, String memo, String photoUri) {
+    public LocationEntity(String category, String subCategory, double latitude, double longitude, String timestamp, String memo, String photoUri) {
         this.category = category;
+        this.subCategory = subCategory;
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;

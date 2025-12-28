@@ -1,28 +1,45 @@
 package com.example.baapp.common;
 
+import com.example.baapp.R;
+
 public enum MainCategory {
-        EMERGENCY("緊急"),
-        WARNING("警告"),
-        INFO("情報"),
-        SUPPORT("支援"),
-        DAILY("日常");
+    EMERGENCY("EMERGENCY", R.string.cat_emergency),
+    WARNING("WARNING", R.string.cat_warning),
+    INFO("INFO", R.string.cat_info),
+    SUPPORT("SUPPORT", R.string.cat_support),
+    DAILY("DAILY", R.string.cat_daily);
 
-        private final String label;
+    private final String id;
+    private final int label;
 
-        MainCategory(String label) {
-                this.label = label;
+    MainCategory(String id, int label) {
+        this.id = id;
+        this.label = label;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public int getLabel() {
+        return label;
+    }
+
+    public static MainCategory fromId(String id) {
+        for (MainCategory category : values()) {
+            if (category.getId().equals(id)) {
+                return category;
+            }
         }
+        return DAILY;
+    }
 
-        public String getLabel() {
-                return label;
+    public static MainCategory fromLabel(int label) {
+        for (MainCategory category : values()) {
+            if (category.getLabel() == label) {
+                return category;
+            }
         }
-
-        public static MainCategory fromLabel(String label) {
-                for (MainCategory category : values()) {
-                        if (category.getLabel().equals(label)) {
-                                return category;
-                        }
-                }
-                return DAILY; // デフォルト（必要に応じて変更可）
-        }
+        return DAILY; // デフォルト（必要に応じて変更可）
+    }
 }

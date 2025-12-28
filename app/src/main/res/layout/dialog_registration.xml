@@ -7,9 +7,10 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="4dp"
         android:text="カテゴリ"
-        android:textSize="16sp"
-        android:paddingBottom="4dp"/>
+        android:textSize="16sp" />
+
     <Spinner
         android:id="@+id/categorySpinner"
         android:layout_width="match_parent"
@@ -18,42 +19,43 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="4dp"
         android:text="サブカテゴリ（自由記述）"
-        android:textSize="16sp"
-        android:paddingBottom="4dp"/>
+        android:textSize="16sp" />
+
     <EditText
         android:id="@+id/subCategoryEditText"
-        android:hint="例：倒木、不審者など"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:hint="例：倒木、不審者など" />
 
     <EditText
         android:id="@+id/latitudeField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="緯度"
-        android:enabled="true"/>
+        android:enabled="true"
+        android:hint="緯度" />
 
     <EditText
         android:id="@+id/longitudeField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="経度"
-        android:enabled="true"/>
+        android:enabled="true"
+        android:hint="経度" />
 
     <EditText
         android:id="@+id/timestampField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="時刻"
-        android:enabled="true"/>
+        android:enabled="true"
+        android:hint="時刻" />
 
     <EditText
         android:id="@+id/memoField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="メモを入力"
-        android:inputType="text"/>
+        android:inputType="text" />
 
     <Button
         android:id="@+id/btnAddPhoto"
@@ -65,8 +67,8 @@
         android:id="@+id/photoPreview"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:layout_marginTop="8dp"
         android:scaleType="centerCrop"
-        android:visibility="gone"
-        android:layout_marginTop="8dp"/>
+        android:visibility="gone" />
 
 </LinearLayout>

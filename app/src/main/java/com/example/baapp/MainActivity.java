@@ -6,15 +6,12 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.example.baapp.CsvImport.CsvImporter;
 import com.example.baapp.common.ConstCode;
@@ -92,13 +89,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             displayedMarkers = tempLocations;
             lastLocationPoint = lastLocation;
 
-            Toast.makeText(this, "前回の位置情報を使用しています", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.use_last_location, Toast.LENGTH_LONG).show();
         }
 
         // 非同期で現在地を取得 → 反映
         locationService.getCurrentLocationAsync(ctx, (GeoPoint location) -> {
             if (location != null) {
-                markerManager.updateCurrentLocation(this, location, "現在地");
+                markerManager.updateCurrentLocation(this, location, this.getString(R.string.current_location));
                 // 🔥 中心移動を遅延実行
                 if (!isFinishing() && !isDestroyed()) {
                     markerManager.removeMarkers(displayedMarkers);
@@ -117,10 +114,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                     displayedMarkers = recentLocations;
 
-                    Toast.makeText(this, "現在地を取得しました", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.get_current_location, Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this, "現在地を取得できませんでした", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.error_get_current_location, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -136,9 +133,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             if (point != null) {
                 mapView.getController().setCenter(point);
-                Toast.makeText(this, "現在地に移動しました", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.center_on_current_location, Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "現在地を取得できません", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.error_get_current_location, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -168,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         locationService.startLocationPolling(this, point -> {
             if (point != null) {
-                markerManager.updateCurrentLocation(this, point, "現在地");
+                markerManager.updateCurrentLocation(this, point, this.getString(R.string.current_location));
 
                 if (lastLocationPoint != null) {
                     GeoPoint center = (GeoPoint) mapView.getMapCenter();
@@ -210,9 +207,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         if (requestCode == 1001) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "位置情報の許可がされました", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.permitted_gps, Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "位置情報の許可が拒否されました", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.denied_gps, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -244,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             CsvImporter importer = new CsvImporter(db);
             importer.importFromCsv(this, fileUri);
 
-            Toast.makeText(this, "CSVインポートが完了しました。", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.complete_import_csv, Toast.LENGTH_SHORT).show();
 
             // CSVインポート完了メッセージの後
             GeoPoint lastLocation = locationService.getLastKnownLocation(this);

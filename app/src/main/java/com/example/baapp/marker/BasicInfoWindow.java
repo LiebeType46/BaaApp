@@ -3,10 +3,11 @@ package com.example.baapp.marker;
 import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.baapp.R;
+import com.example.baapp.common.CategoryLabelResolver;
+import com.example.baapp.common.MainCategoryConverter;
 import com.example.baapp.data.LocationEntity;
 
 import org.osmdroid.views.MapView;
@@ -29,6 +30,7 @@ public class BasicInfoWindow extends InfoWindow {
         Marker marker = (Marker) item;
 
         TextView categoryView = mView.findViewById(R.id.info_category);
+        TextView subCategoryView = mView.findViewById(R.id.info_subcategory);
         TextView latlonView = mView.findViewById(R.id.info_latlon);
         TextView timeView = mView.findViewById(R.id.info_time);
         TextView memoView = mView.findViewById(R.id.info_memo);
@@ -36,7 +38,9 @@ public class BasicInfoWindow extends InfoWindow {
 
         if (marker.getRelatedObject() instanceof LocationEntity) {
             LocationEntity entity = (LocationEntity) marker.getRelatedObject();
-            categoryView.setText(entity.getCategory());
+            String label = CategoryLabelResolver.getLabel(mView.getContext(), MainCategoryConverter.toCategory(entity.getCategory()));
+            categoryView.setText(label);
+            subCategoryView.setText(entity.getSubCategory());
             latlonView.setText(String.format(Locale.getDefault(), "%.6f, %.6f", entity.getLatitude(), entity.getLongitude()));
             timeView.setText(entity.getTimestamp());
             memoView.setText(entity.getMemo());
@@ -58,6 +62,10 @@ public class BasicInfoWindow extends InfoWindow {
 
     @Override
     public void onClose() {
-        // クリーンアップ不要なら空でOK
+        ImageView imageView = mView.findViewById(R.id.info_image);
+        if (imageView != null) {
+            imageView.setImageDrawable(null);
+            imageView.setOnClickListener(null);
+        }
     }
 }

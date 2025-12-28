@@ -13,6 +13,13 @@
         android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/info_subcategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="サブカテゴリ"
+        android:textStyle="bold" />
+
+    <TextView
         android:id="@+id/info_latlon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

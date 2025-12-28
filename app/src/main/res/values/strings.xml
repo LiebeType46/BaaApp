@@ -1,3 +1,49 @@
 <resources>
     <string name="app_name">B&amp;A App</string>
+
+    <!-- 汎用 -->
+    <string name="cancel">キャンセル</string>
+    <string name="btn_register">登録</string>
+
+    <!-- カテゴリ -->
+    <string name="cat_emergency">緊急</string>
+    <string name="cat_warning">警告</string>
+    <string name="cat_info">情報</string>
+    <string name="cat_support">支援</string>
+    <string name="cat_daily">日常</string>
+
+    <!-- ダイアログ -->
+    <string name="dialog_title_register">地点登録</string>
+
+    <!-- 正常系 -->
+    <string name="complete_register">登録しました：</string>
+
+    <!-- エラー系 -->
+    <string name="error_invalid_location">有効な位置情報を入力してください</string>
+    <string name="error_fail_register">登録に失敗しました</string>
+    <string name="error_read_picture">画像の読み込みに失敗しました</string>
+    <string name="error_process_picture">画像の処理中にエラーが発生しました</string>
+    <string name="error_launch_camera">カメラ起動に失敗しました</string>
+    <string name="error_fail_get">取得できませんでした</string>
+
+    <!-- 写真オプション -->
+    <string name="add_picture">写真を追加</string>
+    <string name="take_photo">写真を撮影</string>
+    <string name="select_picture">画像を選択</string>
+
+    <!-- CSV関係 -->
+    <string name="select_file">CSV　ファイルを選択</string>
+    <string name="warn_import">インポートはアクティビティからのみ実行可能です</string>
+    <string name="complete_import_csv">CSVインポートが完了しました</string>
+
+    <!-- メイン画面関係 -->
+    <string name="use_last_location">前回の位置情報を使用しています</string>
+    <string name="current_location">現在地</string>
+    <string name="get_current_location">現在地を取得しました</string>
+    <string name="error_get_current_location">現在地を取得できません</string>
+    <string name="center_on_current_location">現在地に移動しました</string>
+    <string name="permitted_gps">位置情報の許可がされました</string>
+    <string name="denied_gps">位置情報の許可が拒否されました</string>
+
+
 </resources>
