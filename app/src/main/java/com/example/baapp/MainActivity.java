@@ -13,7 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.baapp.CsvImport.CsvImporter;
+import com.example.baapp.Csv.CsvImporter;
 import com.example.baapp.common.ConstCode;
 import com.example.baapp.data.AppDatabase;
 import com.example.baapp.data.LocationEntity;
@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mapService = new MapService(mapView);
 
         db = AppDatabase.getInstance(getApplicationContext());
+
+        // ユーザー情報確認
+
 
 
         // LocationService 初期化

@@ -118,9 +118,9 @@ public class LocationService {
         return null;
     }
 
-    public void saveLocation(String category, String subCategory, String latitude, String longitude, String timestamp, String memo, String photoPath) {
+    public void saveLocation(String category, String subCategory, String latitude, String longitude, String timestamp, String memo, boolean uploadFlg, String photoPath) {
         try {
-            LocationEntity locationEntity = createLocationEntity(category, subCategory, latitude, longitude, timestamp, memo, photoPath);
+            LocationEntity locationEntity = createLocationEntity(category, subCategory, latitude, longitude, timestamp, memo, uploadFlg, photoPath);
 
             db.locationDao().insert(locationEntity);
             Log.d("LocationService", "データが保存されました。");
@@ -131,10 +131,10 @@ public class LocationService {
         }
     }
 
-    private LocationEntity createLocationEntity(String cat, String subCat, String latStr, String lonStr, String ts, String memo, String photoPath) {
+    private LocationEntity createLocationEntity(String cat, String subCat, String latStr, String lonStr, String ts, String memo, boolean uploadFlg, String photoPath) {
         double lat = Double.parseDouble(latStr);
         double lon = Double.parseDouble(lonStr);
-        return new LocationEntity(cat, subCat, lat, lon, ts, memo, photoPath);
+        return new LocationEntity(cat, subCat, lat, lon, ts, memo, uploadFlg, photoPath);
     }
 
     public interface LocationCallback {

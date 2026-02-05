@@ -15,14 +15,17 @@ public class LocationEntity {
     private double longitude;
     private String timestamp;
     private String memo;
+    private boolean uploadFlg;
 
-    public LocationEntity(String category, String subCategory, double latitude, double longitude, String timestamp, String memo, String photoUri) {
+
+    public LocationEntity(String category, String subCategory, double latitude, double longitude, String timestamp, String memo, boolean uploadFlg, String photoUri) {
         this.category = category;
         this.subCategory = subCategory;
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
         this.memo = memo;
+        this.uploadFlg = uploadFlg;
         this.photoUri = photoUri;
     }
 
@@ -38,6 +41,7 @@ public class LocationEntity {
     public String getCategory() {
         return category;
     }
+
     public void setCategory(String category) {
         this.category = category;
     }
@@ -45,9 +49,11 @@ public class LocationEntity {
     public String getSubCategory() {
         return subCategory;
     }
+
     public void setSubCategory(String subCategory) {
         this.category = subCategory;
     }
+
     public double getLatitude() {
         return latitude;
     }
@@ -79,6 +85,15 @@ public class LocationEntity {
     public void setMemo(String memo) {
         this.memo = memo;
     }
+
+    public boolean isUploadFlg() {
+        return uploadFlg;
+    }
+
+    public void setUploadFlg(boolean uploadFlg) {
+        this.uploadFlg = uploadFlg;
+    }
+
 
     private String photoUri;
 

@@ -1,4 +1,4 @@
-package com.example.baapp.CsvImport;
+package com.example.baapp.Csv;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
@@ -83,8 +83,9 @@ public class CsvImporter {
             double lon = Double.parseDouble(cols[3].trim());
             String timestamp = cols[4].trim();
             String memo = cols[5].trim();
+            boolean uploadFlg = true;
             String photoPath = cols[6].trim();
-            return new LocationEntity(category, subCategory, lat, lon, timestamp, memo, photoPath);
+            return new LocationEntity(category, subCategory, lat, lon, timestamp, memo, uploadFlg, photoPath);
         } catch (Exception e) {
             Log.w("CsvImporter", "変換失敗: " + line);
             return null;

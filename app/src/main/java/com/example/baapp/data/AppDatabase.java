@@ -144,4 +144,11 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    static final  Migration MIGRATION_6_7 = new Migration(6, 7) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE locations ADD COLUMN uploadFlg INTEGER  NOT NULL DEFAULT 0");
+        }
+    };
+
 }

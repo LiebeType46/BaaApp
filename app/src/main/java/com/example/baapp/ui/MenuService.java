@@ -9,6 +9,7 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.example.baapp.R;
+import com.example.baapp.connection.SvConnectService;
 
 public class MenuService {
 
@@ -48,7 +49,7 @@ public class MenuService {
                 Toast.makeText(context, context.getString(R.string.warn_import), Toast.LENGTH_SHORT).show();
             }
         } else if (itemId == R.id.menu_item3) {
-            Toast.makeText(context, "Option 3 Selected", Toast.LENGTH_SHORT).show();
+            SvConnectService.upload(context);
         } else {
             Toast.makeText(context, "Unknown Option", Toast.LENGTH_SHORT).show();
         }

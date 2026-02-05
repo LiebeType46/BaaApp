@@ -154,13 +154,14 @@ public class DialogHelper {
         String lonStr = longitudeField.getText().toString();
         String timestamp = timestampField.getText().toString();
         String memo = memoField.getText().toString();
+        boolean uploadFlg = false;
         String uriStr = photoUri != null ? photoUri.toString() : "";
 
         try {
             double latitude = Double.parseDouble(latStr);
             double longitude = Double.parseDouble(lonStr);
 
-            locationService.saveLocation(category, subCategory, latStr, lonStr, timestamp, memo, uriStr);
+            locationService.saveLocation(category, subCategory, latStr, lonStr, timestamp, memo, uploadFlg, uriStr);
             Toast.makeText(context, R.string.complete_register + memo, Toast.LENGTH_SHORT).show();
 
             if (context instanceof MainActivity) {

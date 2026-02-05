@@ -34,4 +34,12 @@ public interface LocationDao {
     @Query("SELECT * FROM locations WHERE timestamp >= :threshold")
     List<LocationEntity> getLocationsWithinTimeRange(String threshold);
 
+    @Query("SELECT * FROM locations WHERE uploadFlg = 0 ORDER BY id ASC")
+    List<LocationEntity> getUnuploadedLocations();
+
+    @Query("SELECT COUNT(*) FROM locations WHERE uploadFlg = 0")
+    int countUnuploaded();
+
+    @Query("UPDATE locations SET uploadFlg = 1 WHERE id IN (:ids)")
+    int markUploaded(List<Long> ids);
 }
