@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.baapp.common.MainCategoryConverter;
 
-@Database(entities = {LocationEntity.class}, version = 6, exportSchema = false)
+@Database(entities = {LocationEntity.class}, version = 7, exportSchema = false)
 @TypeConverters({MainCategoryConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -36,6 +36,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             .addMigrations(MIGRATION_3_4)
                             .addMigrations(MIGRATION_4_5)
                             .addMigrations(MIGRATION_5_6)
+                            .addMigrations(MIGRATION_6_7)
                             .build();
                     Log.d("AppDatabase", "AppDatabase initialized");
                 }
