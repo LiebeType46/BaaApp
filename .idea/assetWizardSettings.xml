@@ -311,8 +311,9 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="ic_my_location" />
-                            <entry key="sourceFile" value="C:\Users\allne\AndroidStudioProjects\BAApp" />
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="outputName" value="ic_account" />
+                            <entry key="sourceFile" value="E:\Download2nd\人物の無料素材.svg" />
                           </map>
                         </option>
                       </PersistentState>

@@ -82,9 +82,17 @@ public class LocationService {
                     }
                 }
 
-                @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
-                @Override public void onProviderEnabled(@NonNull String provider) {}
-                @Override public void onProviderDisabled(@NonNull String provider) {}
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+                }
+
+                @Override
+                public void onProviderEnabled(@NonNull String provider) {
+                }
+
+                @Override
+                public void onProviderDisabled(@NonNull String provider) {
+                }
             };
 
             locationManager.requestLocationUpdates(provider, 0, 0, listener);
@@ -118,23 +126,15 @@ public class LocationService {
         return null;
     }
 
-    public void saveLocation(String category, String subCategory, String latitude, String longitude, String timestamp, String memo, boolean uploadFlg, String photoPath) {
-        try {
-            LocationEntity locationEntity = createLocationEntity(category, subCategory, latitude, longitude, timestamp, memo, uploadFlg, photoPath);
+    public void saveLocation(String category, String subCategory, double latitude, double longitude, String timestamp, String memo, boolean uploadFlg, String photoPath) {
+        LocationEntity locationEntity = createLocationEntity(category, subCategory, latitude, longitude, timestamp, memo, uploadFlg, photoPath);
 
-            db.locationDao().insert(locationEntity);
-            Log.d("LocationService", "データが保存されました。");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e("LocationService", "保存に失敗しました。");
-        }
+        db.locationDao().insert(locationEntity);
+        Log.d("LocationService", "データが保存されました。");
     }
 
-    private LocationEntity createLocationEntity(String cat, String subCat, String latStr, String lonStr, String ts, String memo, boolean uploadFlg, String photoPath) {
-        double lat = Double.parseDouble(latStr);
-        double lon = Double.parseDouble(lonStr);
-        return new LocationEntity(cat, subCat, lat, lon, ts, memo, uploadFlg, photoPath);
+    private LocationEntity createLocationEntity(String cat, String subCat, double latitude, double longitude, String ts, String memo, boolean uploadFlg, String photoPath) {
+        return new LocationEntity(cat, subCat, latitude, longitude, ts, memo, uploadFlg, photoPath);
     }
 
     public interface LocationCallback {
@@ -177,9 +177,17 @@ public class LocationService {
                 callback.onLocationUpdate(point);
             }
 
-            @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
-            @Override public void onProviderEnabled(@NonNull String provider) {}
-            @Override public void onProviderDisabled(@NonNull String provider) {}
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+
+            @Override
+            public void onProviderEnabled(@NonNull String provider) {
+            }
+
+            @Override
+            public void onProviderDisabled(@NonNull String provider) {
+            }
         };
 
         try {
@@ -214,7 +222,6 @@ public class LocationService {
     pollingHandler.post(pollingRunnable);
     */
     }
-
 
 
     public interface PollingCallback {

@@ -8,8 +8,10 @@ import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import com.example.baapp.MainActivity;
 import com.example.baapp.R;
 import com.example.baapp.connection.SvConnectService;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MenuService {
 
@@ -31,11 +33,15 @@ public class MenuService {
         };
     }
 
-    private static void handleMenuItemClick(Context context, MenuItem item) { // 戻り値を void に変更
+    private static void handleMenuItemClick(Context context, MenuItem item) {
         int itemId = item.getItemId();
 
         if (itemId == R.id.menu_item1) {
-            DialogHelper.showLocationRegistrationDialog(context); // ダイアログを表示
+            if (context instanceof MainActivity) {
+                DialogHelper.showLocationRegistrationDialog((MainActivity) context);
+            } else {
+                Toast.makeText(context, "Unknown context", Toast.LENGTH_SHORT).show();
+            }
         } else if (itemId == R.id.menu_item2) {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
@@ -53,5 +59,26 @@ public class MenuService {
         } else {
             Toast.makeText(context, "Unknown Option", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public static void setupBottomNavigation(MainActivity activity, BottomNavigationView bottomNavigation) {
+        bottomNavigation.setSelectedItemId(R.id.navigation_map);
+
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.navigation_map) {
+                activity.showMapMode();
+                return true;
+            } else if (itemId == R.id.navigation_timeline) {
+                activity.showTimelineMode();
+                return true;
+            } else if (itemId == R.id.navigation_account) {
+                activity.showAccountOptions();
+                return true;
+            }
+
+            return false;
+        });
     }
 }

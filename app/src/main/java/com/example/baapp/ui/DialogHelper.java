@@ -21,7 +21,6 @@ import androidx.annotation.NonNull;
 import com.example.baapp.MainActivity;
 import com.example.baapp.R;
 import com.example.baapp.common.MainCategory;
-import com.example.baapp.data.LocationEntity;
 import com.example.baapp.location.LocationService;
 import com.example.baapp.photo.PhotoService;
 
@@ -31,14 +30,18 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 public class DialogHelper {
 
-    public static void showLocationRegistrationDialog(Context context) {
-        new DialogHelper(context).show();
+    public static void showLocationRegistrationDialog(MainActivity activity) {
+        DialogHelper dialog = new DialogHelper(
+                activity,
+                activity.getLocationService(),
+                activity::refreshMarkers
+        );
+        dialog.show();
     }
 
     private final Context context;
@@ -55,11 +58,18 @@ public class DialogHelper {
     private ImageView photoPreview;
     private Uri photoUri;
     private File photoFile;
+    public interface OnLocationSavedListener {
+        void onLocationSaved();
+    }
+    private final OnLocationSavedListener listener;
 
-    private DialogHelper(Context context) {
+    public DialogHelper(Context context,
+                        LocationService locationService,
+                        OnLocationSavedListener listener) {
         this.context = context;
-        this.locationService = LocationService.getInstance(context);
+        this.locationService = locationService;
         this.photoService = PhotoService.getInstance(context);
+        this.listener = listener;
     }
 
     private void show() {
@@ -140,7 +150,7 @@ public class DialogHelper {
         latitudeField.setText(String.format(Locale.getDefault(), "%.6f", location.getLatitude()));
         longitudeField.setText(String.format(Locale.getDefault(), "%.6f", location.getLongitude()));
 
-        String timestamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
         timestampField.setText(timestamp);
     }
 
@@ -150,27 +160,25 @@ public class DialogHelper {
         String category =
                 selected != null ? selected.getId() : MainCategory.DAILY.getId();
         String subCategory = subCategoryField.getText().toString();
-        String latStr = latitudeField.getText().toString();
-        String lonStr = longitudeField.getText().toString();
         String timestamp = timestampField.getText().toString();
         String memo = memoField.getText().toString();
         boolean uploadFlg = false;
         String uriStr = photoUri != null ? photoUri.toString() : "";
 
         try {
-            double latitude = Double.parseDouble(latStr);
-            double longitude = Double.parseDouble(lonStr);
+            double latitude = Double.parseDouble(latitudeField.getText().toString());
+            double longitude = Double.parseDouble(longitudeField.getText().toString());
 
-            locationService.saveLocation(category, subCategory, latStr, lonStr, timestamp, memo, uploadFlg, uriStr);
-            Toast.makeText(context, R.string.complete_register + memo, Toast.LENGTH_SHORT).show();
+            locationService.saveLocation(category, subCategory, latitude, longitude, timestamp, memo, uploadFlg, uriStr);
+            Toast.makeText(
+                    context,
+                    context.getString(R.string.complete_register) + category,
+                    Toast.LENGTH_SHORT
+            ).show();
 
-            if (context instanceof MainActivity) {
-                GeoPoint lastLocation = locationService.getLastKnownLocation(context);
-                List<LocationEntity> recent = locationService.getRecentLocationsSortedByDistance(context, lastLocation);
-                ((MainActivity) context).getMarkerManager().initMarkers(recent);
+            if (listener != null) {
+                listener.onLocationSaved();
             }
-
-
         } catch (NumberFormatException e) {
             Toast.makeText(context, R.string.error_invalid_location, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {

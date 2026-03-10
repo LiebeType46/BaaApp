@@ -74,7 +74,7 @@ public class CsvImporter {
 
     private LocationEntity toEntity(String line) {
         String[] cols = smartCsvSplit(line);
-        if (cols.length != 7) return null;
+        if (cols.length != 8) return null;
         try {
             // 各値に trim() を追加
             String category = cols[0].trim();

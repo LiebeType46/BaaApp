@@ -5,11 +5,10 @@ import android.graphics.drawable.Drawable;
 
 import com.example.baapp.R;
 import com.example.baapp.data.LocationEntity;
-import com.example.baapp.photo.PhotoService;
 
 import org.osmdroid.events.MapEventsReceiver;
-import org.osmdroid.views.MapView;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.infowindow.InfoWindow;
@@ -22,6 +21,8 @@ public class MarkerManager {
     private Marker currentLocationMarker; // ← 現在地用マーカーを1つだけ保持
 
     private final OnThumbnailClickListener thumbnailClickListener;
+
+    private MapEventsOverlay mapEventsOverlay;
 
     public MarkerManager(MapView mapView, OnThumbnailClickListener listener) {
         this.mapView = mapView;
@@ -101,6 +102,10 @@ public class MarkerManager {
 
     // マネージャ初期化時に呼び出す（または mapView セット直後）
     public void setupMapClickListener() {
+        if (mapEventsOverlay != null) {
+            return;
+        }
+
         MapEventsReceiver receiver = new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
@@ -114,8 +119,8 @@ public class MarkerManager {
             }
         };
 
-        MapEventsOverlay eventsOverlay = new MapEventsOverlay(receiver);
-        mapView.getOverlays().add(eventsOverlay);
+        mapEventsOverlay = new MapEventsOverlay(receiver);
+        mapView.getOverlays().add(mapEventsOverlay);
     }
 
 }

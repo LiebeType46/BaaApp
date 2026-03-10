@@ -51,7 +51,7 @@ public class LocationEntity {
     }
 
     public void setSubCategory(String subCategory) {
-        this.category = subCategory;
+        this.subCategory = subCategory;
     }
 
     public double getLatitude() {

@@ -7,6 +7,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -26,6 +27,7 @@ import com.example.baapp.photo.PhotoCaptureCallback;
 import com.example.baapp.photo.PhotoService;
 import com.example.baapp.photo.PhotoSession;
 import com.example.baapp.ui.MenuService;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.osmdroid.config.Configuration;
@@ -42,9 +44,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private MarkerManager markerManager;
     private AppDatabase db;
     private LocationService locationService;
+    public LocationService getLocationService() {
+        return locationService;
+    }
     private MapService mapService;
     private List<LocationEntity> displayedMarkers = new ArrayList<>();
     private GeoPoint lastLocationPoint = null;
+    public void refreshMarkers() {
+        GeoPoint lastLocation = locationService.getLastKnownLocation(this);
+        List<LocationEntity> recent =
+                locationService.getRecentLocationsSortedByDistance(this, lastLocation);
+        markerManager.initMarkers(recent);
+    }
+    private BottomNavigationView bottomNavigation;
+    private FloatingActionButton fabMenu;
+    private ImageButton btnCenterOnCurrentLocation;
 
 
     @Override
@@ -125,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         });
 
         // メニューのセットアップ
-        FloatingActionButton fabMenu = findViewById(R.id.fabMenu);
+        fabMenu = findViewById(R.id.fabMenu);
         fabMenu.setOnClickListener(MenuService.showPopupMenu(this, fabMenu));
 
         ImageButton centerButton = findViewById(R.id.btnCenterOnCurrentLocation);
@@ -141,6 +155,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 Toast.makeText(this, R.string.error_get_current_location, Toast.LENGTH_SHORT).show();
             }
         });
+
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+        MenuService.setupBottomNavigation(this, bottomNavigation);
 
     }
 
@@ -255,5 +272,35 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     public MarkerManager getMarkerManager() {
         return markerManager;
+    }
+
+    public void showMapMode() {
+        if (mapView != null) {
+            mapView.setVisibility(View.VISIBLE);
+        }
+        if (fabMenu != null) {
+            fabMenu.setVisibility(View.VISIBLE);
+        }
+        if (btnCenterOnCurrentLocation != null) {
+            btnCenterOnCurrentLocation.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void showTimelineMode() {
+        if (mapView != null) {
+            mapView.setVisibility(View.GONE);
+        }
+        if (fabMenu != null) {
+            fabMenu.setVisibility(View.GONE);
+        }
+        if (btnCenterOnCurrentLocation != null) {
+            btnCenterOnCurrentLocation.setVisibility(View.GONE);
+        }
+
+        Toast.makeText(this, "タイムライン表示モード", Toast.LENGTH_SHORT).show();
+    }
+
+    public void showAccountOptions() {
+        Toast.makeText(this, "アカウントオプション", Toast.LENGTH_SHORT).show();
     }
 }

@@ -1,17 +1,31 @@
 package com.example.baapp.api;
 
+import com.example.baapp.login.AuthResponse;
 import com.example.baapp.login.LoginRequest;
 import com.google.gson.Gson;
+
+import org.json.JSONObject;
+
+import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class AuthApi {
 
+    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
+    public interface AuthResultCallback {
+        void onSuccess(AuthResponse response);
+        void onError(String message);
+    }
     private static final Gson gson = new Gson();
+    private static final OkHttpClient client = ApiClient.getClient();
 
     public static void login(LoginRequest req, Callback callback) {
 
@@ -38,5 +52,54 @@ public class AuthApi {
         );
 
         call.enqueue(callback);
+    }
+
+    public static void register(String username, String email, String password, AuthResultCallback callback) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("username", username);
+            body.put("email", email);
+            body.put("password", password);
+
+            Request req = new Request.Builder()
+                    .url(ApiConfig.BASE_URL + ApiEndpoint.REGISTER)
+                    .post(RequestBody.create(body.toString(), JSON))
+                    .build();
+
+            client.newCall(req).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    callback.onError("Network error: " + e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String resBody = response.body() != null ? response.body().string() : "";
+
+                    if (!response.isSuccessful()) {
+                        callback.onError("HTTP " + response.code() + "\n" + resBody);
+                        return;
+                    }
+
+                    try {
+                        AuthResponse resObj = gson.fromJson(resBody, AuthResponse.class);
+
+                        if (resObj == null || resObj.token == null || resObj.token.isEmpty()
+                                || resObj.publicId == null || resObj.publicId.isEmpty()) {
+                            callback.onError("Login OK but invalid response body.\n" + resBody);
+                            return;
+                        }
+
+                        callback.onSuccess(resObj);
+
+                    } catch (Exception e) {
+                        callback.onError("Parse error: " + e.getMessage() + "\n" + resBody);
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            callback.onError("Error: " + e.getMessage());
+        }
     }
 }
