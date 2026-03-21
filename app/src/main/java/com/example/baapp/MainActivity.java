@@ -59,6 +59,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private BottomNavigationView bottomNavigation;
     private FloatingActionButton fabMenu;
     private ImageButton btnCenterOnCurrentLocation;
+    private View mapModeContainer;
+    private View timelineModeContainer;
+    private View accountModeContainer;
+    private FloatingActionButton fabPost;
 
 
     @Override
@@ -69,6 +73,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Configuration.getInstance().load(ctx, getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
 
         setContentView(R.layout.activity_main);
+
+        mapModeContainer = findViewById(R.id.mapModeContainer);
+        timelineModeContainer = findViewById(R.id.timelineModeContainer);
+        accountModeContainer = findViewById(R.id.accountModeContainer);
+
+        fabMenu = findViewById(R.id.fabMenu);
+        btnCenterOnCurrentLocation = findViewById(R.id.btnCenterOnCurrentLocation);
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+        fabPost = findViewById(R.id.fabPost);
 
         // パーミッション確認
         if (!LocationPermissionHelper.hasLocationPermission(this)) {
@@ -142,8 +155,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         fabMenu = findViewById(R.id.fabMenu);
         fabMenu.setOnClickListener(MenuService.showPopupMenu(this, fabMenu));
 
-        ImageButton centerButton = findViewById(R.id.btnCenterOnCurrentLocation);
-        centerButton.setOnClickListener(v -> {
+        btnCenterOnCurrentLocation.setOnClickListener(v -> {
             GeoPoint point = lastLocationPoint != null
                     ? lastLocationPoint
                     : locationService.getLastKnownLocation(this);
@@ -156,9 +168,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
+        fabPost = findViewById(R.id.fabPost);
+        fabPost.setOnClickListener(v ->
+                Toast.makeText(this, "投稿ダイアログを開く", Toast.LENGTH_SHORT).show()
+        );
+
         bottomNavigation = findViewById(R.id.bottomNavigation);
         MenuService.setupBottomNavigation(this, bottomNavigation);
 
+        showMapMode();
     }
 
 
@@ -275,32 +293,22 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     public void showMapMode() {
-        if (mapView != null) {
-            mapView.setVisibility(View.VISIBLE);
-        }
-        if (fabMenu != null) {
-            fabMenu.setVisibility(View.VISIBLE);
-        }
-        if (btnCenterOnCurrentLocation != null) {
-            btnCenterOnCurrentLocation.setVisibility(View.VISIBLE);
-        }
+        mapModeContainer.setVisibility(View.VISIBLE);
+        timelineModeContainer.setVisibility(View.GONE);
+        accountModeContainer.setVisibility(View.GONE);
     }
 
     public void showTimelineMode() {
-        if (mapView != null) {
-            mapView.setVisibility(View.GONE);
-        }
-        if (fabMenu != null) {
-            fabMenu.setVisibility(View.GONE);
-        }
-        if (btnCenterOnCurrentLocation != null) {
-            btnCenterOnCurrentLocation.setVisibility(View.GONE);
-        }
-
-        Toast.makeText(this, "タイムライン表示モード", Toast.LENGTH_SHORT).show();
+        mapModeContainer.setVisibility(View.GONE);
+        timelineModeContainer.setVisibility(View.VISIBLE);
+        accountModeContainer.setVisibility(View.GONE);
     }
 
     public void showAccountOptions() {
-        Toast.makeText(this, "アカウントオプション", Toast.LENGTH_SHORT).show();
+        mapModeContainer.setVisibility(View.GONE);
+        timelineModeContainer.setVisibility(View.GONE);
+        accountModeContainer.setVisibility(View.VISIBLE);
+
+        Toast.makeText(this, "アカウント画面は未実装", Toast.LENGTH_SHORT).show();
     }
 }
