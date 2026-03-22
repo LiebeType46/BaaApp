@@ -1,0 +1,46 @@
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Local machine config
+local.properties
+
+# Generated / reports
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Logs
+*.log
+
+# Build artifacts
+*.apk
+*.aab
+*.ap_
+*.class
+
+# NDK
+obj/
+
+# Database / local runtime files
+*.db
+*.db-shm
+*.db-wal
+
+# CSV exports / local data
+*.csv
+
+# Keystore
+*.jks
+*.keystore
+
+# OS files
+.DS_Store
+Thumbs.db
