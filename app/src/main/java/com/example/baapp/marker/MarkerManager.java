@@ -19,6 +19,7 @@ public class MarkerManager {
 
     private final MapView mapView;
     private Marker currentLocationMarker; // ← 現在地用マーカーを1つだけ保持
+    private Marker focusedLocationMarker;
 
     private final OnThumbnailClickListener thumbnailClickListener;
 
@@ -123,4 +124,44 @@ public class MarkerManager {
         mapView.getOverlays().add(mapEventsOverlay);
     }
 
+    public void showFocusedLocation(LocationEntity entity) {
+        if (entity == null) {
+            return;
+        }
+
+        if (focusedLocationMarker != null) {
+            mapView.getOverlays().remove(focusedLocationMarker);
+            focusedLocationMarker = null;
+        }
+
+        focusedLocationMarker = new Marker(mapView);
+        focusedLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        focusedLocationMarker.setPosition(new GeoPoint(entity.getLatitude(), entity.getLongitude()));
+        focusedLocationMarker.setTitle(entity.getCategory() + entity.getMemo());
+        focusedLocationMarker.setRelatedObject(entity);
+
+        focusedLocationMarker.setInfoWindow(new BasicInfoWindow(
+                R.layout.marker_info_window,
+                mapView,
+                thumbnailClickListener
+        ));
+
+        focusedLocationMarker.setOnMarkerClickListener((m, v) -> {
+            InfoWindow.closeAllInfoWindowsOn(mapView);
+            m.showInfoWindow();
+            return true;
+        });
+
+        mapView.getOverlays().add(focusedLocationMarker);
+        focusedLocationMarker.showInfoWindow();
+        mapView.invalidate();
+    }
+
+    public void clearFocusedLocation() {
+        if (focusedLocationMarker != null) {
+            mapView.getOverlays().remove(focusedLocationMarker);
+            focusedLocationMarker = null;
+            mapView.invalidate();
+        }
+    }
 }

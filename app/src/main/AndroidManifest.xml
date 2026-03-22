@@ -35,6 +35,8 @@
             android:name=".MainActivity"
             android:exported="false" />
 
+        <activity android:name=".LocationDetailActivity" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

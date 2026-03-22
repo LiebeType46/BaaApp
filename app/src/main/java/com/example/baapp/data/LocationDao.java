@@ -42,4 +42,10 @@ public interface LocationDao {
 
     @Query("UPDATE locations SET uploadFlg = 1 WHERE id IN (:ids)")
     int markUploaded(List<Long> ids);
+
+    @Query("SELECT * FROM locations ORDER BY timestamp DESC LIMIT :limit")
+    List<LocationEntity> getLatestLocations(int limit);
+
+    @Query("SELECT * FROM locations WHERE id = :id LIMIT 1")
+    LocationEntity findById(int id);
 }

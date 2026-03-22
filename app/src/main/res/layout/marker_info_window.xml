@@ -46,4 +46,12 @@
         android:visibility="gone"
         android:layout_marginTop="4dp"
         android:onClick="onTumbnailClick"/>
+
+    <TextView
+        android:id="@+id/tvOpenDetail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="この投稿の詳細"
+        android:textColor="#1E88E5"
+        android:paddingTop="8dp" />
 </LinearLayout>

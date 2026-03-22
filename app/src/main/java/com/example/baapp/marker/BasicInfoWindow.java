@@ -1,10 +1,12 @@
 package com.example.baapp.marker;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.baapp.LocationDetailActivity;
 import com.example.baapp.R;
 import com.example.baapp.common.CategoryLabelResolver;
 import com.example.baapp.common.MainCategoryConverter;
@@ -35,6 +37,7 @@ public class BasicInfoWindow extends InfoWindow {
         TextView timeView = mView.findViewById(R.id.info_time);
         TextView memoView = mView.findViewById(R.id.info_memo);
         ImageView imageView = mView.findViewById(R.id.info_image);
+        TextView detailLinkView = mView.findViewById(R.id.tvOpenDetail);
 
         if (marker.getRelatedObject() instanceof LocationEntity) {
             LocationEntity entity = (LocationEntity) marker.getRelatedObject();
@@ -57,6 +60,12 @@ public class BasicInfoWindow extends InfoWindow {
             } else {
                 imageView.setVisibility(View.GONE);
             }
+
+            detailLinkView.setOnClickListener(v -> {
+                Intent intent = new Intent(mView.getContext(), LocationDetailActivity.class);
+                intent.putExtra("location_id", entity.getId());
+                mView.getContext().startActivity(intent);
+            });
         }
     }
 

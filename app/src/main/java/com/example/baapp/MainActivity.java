@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.baapp.Csv.CsvImporter;
 import com.example.baapp.common.ConstCode;
@@ -27,6 +30,7 @@ import com.example.baapp.photo.PhotoCaptureCallback;
 import com.example.baapp.photo.PhotoService;
 import com.example.baapp.photo.PhotoSession;
 import com.example.baapp.ui.MenuService;
+import com.example.baapp.ui.TimelineAdapter;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -39,6 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
+
+    public static final String EXTRA_FOCUS_LOCATION_ID = "focus_location_id";
 
     private MapView mapView;
     private MarkerManager markerManager;
@@ -63,6 +69,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private View timelineModeContainer;
     private View accountModeContainer;
     private FloatingActionButton fabPost;
+    private RecyclerView timelineRecyclerView;
+    private SwipeRefreshLayout swipeTimeline;
+    private TimelineAdapter timelineAdapter;
 
 
     @Override
@@ -170,13 +179,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         fabPost = findViewById(R.id.fabPost);
         fabPost.setOnClickListener(v ->
-                Toast.makeText(this, "投稿ダイアログを開く", Toast.LENGTH_SHORT).show()
+                com.example.baapp.ui.DialogHelper.showLocationRegistrationDialog(this)
         );
 
         bottomNavigation = findViewById(R.id.bottomNavigation);
         MenuService.setupBottomNavigation(this, bottomNavigation);
 
+        // タイムライン表示のセットアップ
+        timelineRecyclerView = findViewById(R.id.timelineRecyclerView);
+        swipeTimeline = findViewById(R.id.swipeTimeline);
+
+        timelineAdapter = new TimelineAdapter(item -> {
+            Intent intent = new Intent(MainActivity.this, LocationDetailActivity.class);
+            intent.putExtra("location_id", item.getId());
+            startActivity(intent);
+        });
+        timelineRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        timelineRecyclerView.setAdapter(timelineAdapter);
+
+        swipeTimeline.setOnRefreshListener(() -> {
+            loadTimelinePosts();
+            swipeTimeline.setRefreshing(false);
+        });
+
         showMapMode();
+        handleFocusLocationIntent(getIntent());
     }
 
 
@@ -288,6 +315,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
     }
 
+    @Override
+    protected void onNewIntent(@NonNull Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleFocusLocationIntent(intent);
+    }
+
     public MarkerManager getMarkerManager() {
         return markerManager;
     }
@@ -302,6 +336,29 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mapModeContainer.setVisibility(View.GONE);
         timelineModeContainer.setVisibility(View.VISIBLE);
         accountModeContainer.setVisibility(View.GONE);
+
+        loadTimelinePosts();
+    }
+
+    private void handleFocusLocationIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+
+        int locationId = intent.getIntExtra(EXTRA_FOCUS_LOCATION_ID, -1);
+        if (locationId == -1) {
+            return;
+        }
+
+        LocationEntity entity = locationService.getLocationById(locationId);
+        if (entity == null) {
+            return;
+        }
+
+        showMapMode();
+        mapService.focusOnLocation(entity, markerManager);
+
+        intent.removeExtra(EXTRA_FOCUS_LOCATION_ID);
     }
 
     public void showAccountOptions() {
@@ -310,5 +367,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         accountModeContainer.setVisibility(View.VISIBLE);
 
         Toast.makeText(this, "アカウント画面は未実装", Toast.LENGTH_SHORT).show();
+    }
+
+    private void loadTimelinePosts() {
+        List<LocationEntity> latestPosts = locationService.getLatestLocations(100);
+        timelineAdapter.setItems(latestPosts);
     }
 }

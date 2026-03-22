@@ -258,4 +258,11 @@ public class LocationService {
         return result[0];
     }
 
+    public List<LocationEntity> getLatestLocations(int limit) {
+        return db.locationDao().getLatestLocations(limit);
+    }
+
+    public LocationEntity getLocationById(int id) {
+        return db.locationDao().findById(id);
+    }
 }

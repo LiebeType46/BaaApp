@@ -5,4 +5,5 @@
     <color name="bottom_nav_selected">#1E88E5</color>
     <color name="bottom_nav_unselected">#757575</color>
     <color name="bottom_nav_background">#FFFFFFFF</color>
+    <color name="card_stroke">#DDDDDD</color>
 </resources>
