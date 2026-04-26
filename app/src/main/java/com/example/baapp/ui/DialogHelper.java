@@ -158,26 +158,54 @@ public class DialogHelper {
     }
 
     private static void setupSearchCategorySpinner(Context context, Spinner spinner, String selectedCategory) {
-        List<String> categories = new ArrayList<>();
-        categories.add("");
+        List<MainCategory> categories = new ArrayList<>();
+        categories.add(null);
         for (MainCategory category : MainCategory.values()) {
-            categories.add(category.name());
+            categories.add(category);
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        ArrayAdapter<MainCategory> adapter = new ArrayAdapter<MainCategory>(
                 context,
                 android.R.layout.simple_spinner_item,
                 categories
-        );
+        ) {
+            @NonNull
+            @Override
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView tv = (TextView) view;
+                tv.setText(resolveSearchCategoryLabel(context, getItem(position)));
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView tv = (TextView) view;
+                tv.setText(resolveSearchCategoryLabel(context, getItem(position)));
+                return view;
+            }
+        };
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
         if (selectedCategory != null) {
-            int position = categories.indexOf(selectedCategory);
-            if (position >= 0) {
-                spinner.setSelection(position);
+            for (int i = 0; i < categories.size(); i++) {
+                MainCategory category = categories.get(i);
+                if (category != null && selectedCategory.equals(category.getId())) {
+                    spinner.setSelection(i);
+                    return;
+                }
             }
         }
+    }
+
+    private static String resolveSearchCategoryLabel(Context context, MainCategory category) {
+        if (category == null) {
+            return LanguageService.get(context).t("dialog.search_condition.unspecified");
+        }
+
+        return CategoryLabelResolver.getLabel(context, category);
     }
 
     private static void setupResultLimitSpinner(Context context, Spinner spinner, Integer selectedLimit) {
@@ -236,7 +264,8 @@ public class DialogHelper {
             }
         }
 
-        String selectedCategory = normalizeText(String.valueOf(categorySpinner.getSelectedItem()));
+        MainCategory selectedCategoryItem = (MainCategory) categorySpinner.getSelectedItem();
+        String selectedCategory = selectedCategoryItem != null ? selectedCategoryItem.getId() : null;
         Integer resultLimit = (Integer) resultLimitSpinner.getSelectedItem();
 
         return new SearchCondition(
