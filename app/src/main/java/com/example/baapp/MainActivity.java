@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private View mapModeContainer;
     private View timelineModeContainer;
     private View accountModeContainer;
+    private FloatingActionButton fabTimelineSearch;
     private FloatingActionButton fabPost;
     private RecyclerView timelineRecyclerView;
     private SwipeRefreshLayout swipeTimeline;
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         btnCenterOnCurrentLocation = findViewById(R.id.btnCenterOnCurrentLocation);
         bottomNavigation = findViewById(R.id.bottomNavigation);
         fabPost = findViewById(R.id.fabPost);
+        fabTimelineSearch = findViewById(R.id.fabTimelineSearch);
 
         // パーミッション確認
         if (!LocationPermissionHelper.hasLocationPermission(this)) {
@@ -178,6 +180,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         fabPost = findViewById(R.id.fabPost);
         fabPost.setOnClickListener(v ->
                 com.example.baapp.ui.DialogHelper.showLocationRegistrationDialog(this)
+        );
+        fabTimelineSearch.setOnClickListener(v ->
+                com.example.baapp.ui.DialogHelper.showSearchConditionDialog(this)
         );
 
         bottomNavigation = findViewById(R.id.bottomNavigation);
