@@ -21,13 +21,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:paddingBottom="4dp"
-            android:text="サブカテゴリ"
-            android:textSize="16sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="4dp"
+                android:text="サブカテゴリ"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvClearSearchSubCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:text="クリア"
+                android:textColor="@android:color/holo_blue_dark" />
+        </LinearLayout>
 
         <EditText
             android:id="@+id/etSearchSubCategory"
@@ -36,13 +54,31 @@
             android:hint="サブカテゴリ"
             android:inputType="text" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:paddingBottom="4dp"
-            android:text="開始日時"
-            android:textSize="16sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="4dp"
+                android:text="開始日時"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvClearSearchFrom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:text="クリア"
+                android:textColor="@android:color/holo_blue_dark" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvSearchFrom"
@@ -51,19 +87,37 @@
             android:background="@android:drawable/edit_text"
             android:clickable="true"
             android:focusable="true"
-            android:minHeight="48dp"
             android:gravity="center_vertical"
             android:hint="未指定"
+            android:minHeight="48dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:paddingBottom="4dp"
-            android:text="終了日時"
-            android:textSize="16sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="4dp"
+                android:text="終了日時"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvClearSearchTo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:text="クリア"
+                android:textColor="@android:color/holo_blue_dark" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvSearchTo"
@@ -72,19 +126,37 @@
             android:background="@android:drawable/edit_text"
             android:clickable="true"
             android:focusable="true"
-            android:minHeight="48dp"
             android:gravity="center_vertical"
             android:hint="未指定"
+            android:minHeight="48dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:paddingBottom="4dp"
-            android:text="メモキーワード"
-            android:textSize="16sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="4dp"
+                android:text="メモキーワード"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvClearSearchKeyword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:text="クリア"
+                android:textColor="@android:color/holo_blue_dark" />
+        </LinearLayout>
 
         <EditText
             android:id="@+id/etSearchKeyword"
@@ -93,13 +165,31 @@
             android:hint="キーワード"
             android:inputType="text" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:paddingBottom="4dp"
-            android:text="半径（m）"
-            android:textSize="16sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="4dp"
+                android:text="半径（m）"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvClearSearchRadius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:text="クリア"
+                android:textColor="@android:color/holo_blue_dark" />
+        </LinearLayout>
 
         <EditText
             android:id="@+id/etSearchRadius"

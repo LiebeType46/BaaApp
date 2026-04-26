@@ -83,8 +83,19 @@ public class DialogHelper {
         fromText.setOnClickListener(v -> showSearchDateTimePicker(activity, fromText));
         toText.setOnClickListener(v -> showSearchDateTimePicker(activity, toText));
 
+        dialogView.findViewById(R.id.tvClearSearchSubCategory)
+                .setOnClickListener(v -> subCategoryField.setText(""));
+        dialogView.findViewById(R.id.tvClearSearchFrom)
+                .setOnClickListener(v -> fromText.setText(""));
+        dialogView.findViewById(R.id.tvClearSearchTo)
+                .setOnClickListener(v -> toText.setText(""));
+        dialogView.findViewById(R.id.tvClearSearchKeyword)
+                .setOnClickListener(v -> keywordField.setText(""));
+        dialogView.findViewById(R.id.tvClearSearchRadius)
+                .setOnClickListener(v -> radiusField.setText(""));
+
         builder.setPositiveButton("適用", null);
-        builder.setNeutralButton("クリア", null);
+        builder.setNeutralButton("全体クリア", null);
         builder.setNegativeButton(activity.getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
@@ -111,8 +122,16 @@ public class DialogHelper {
             });
 
             dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
-                activity.applySearchCondition(new SearchCondition());
-                dialog.dismiss();
+                clearSearchConditionInputs(
+                        categorySpinner,
+                        subCategoryField,
+                        fromText,
+                        toText,
+                        keywordField,
+                        radiusField,
+                        hasPhotoCheck,
+                        unsentOnlyCheck
+                );
             });
         });
 
@@ -242,6 +261,26 @@ public class DialogHelper {
 
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static void clearSearchConditionInputs(
+            Spinner categorySpinner,
+            EditText subCategoryField,
+            TextView fromText,
+            TextView toText,
+            EditText keywordField,
+            EditText radiusField,
+            CheckBox hasPhotoCheck,
+            CheckBox unsentOnlyCheck
+    ) {
+        categorySpinner.setSelection(0);
+        subCategoryField.setText("");
+        fromText.setText("");
+        toText.setText("");
+        keywordField.setText("");
+        radiusField.setText("");
+        hasPhotoCheck.setChecked(false);
+        unsentOnlyCheck.setChecked(false);
     }
 
     private final Context context;
