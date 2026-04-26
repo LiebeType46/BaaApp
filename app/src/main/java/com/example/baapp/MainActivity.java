@@ -376,7 +376,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void applySearchCondition(SearchCondition condition) {
         currentSearchCondition = condition != null ? condition : new SearchCondition();
 
-        if (currentSearchCondition.hasAnyCondition()) {
+        if (currentSearchCondition.hasAnyCondition()
+                || currentSearchCondition.hasCustomResultLimit()) {
             db.searchConditionDao().save(SearchConditionMapper.toEntity(currentSearchCondition));
         } else {
             db.searchConditionDao().clearCurrent();
@@ -404,8 +405,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private SearchCondition getEffectiveSearchCondition() {
-        return getCurrentSearchCondition().hasAnyCondition()
-                ? getCurrentSearchCondition()
+        SearchCondition currentCondition = getCurrentSearchCondition();
+        if (currentCondition.getResultLimit() == null) {
+            currentCondition.setResultLimit(SearchCondition.DEFAULT_RESULT_LIMIT);
+        }
+
+        return currentCondition.hasAnyCondition() || currentCondition.hasCustomResultLimit()
+                ? currentCondition
                 : defaultSearchCondition;
     }
 
