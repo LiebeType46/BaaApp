@@ -43,6 +43,17 @@ import java.util.Objects;
 
 public class DialogHelper {
 
+    private static final Integer[] SEARCH_RESULT_LIMIT_OPTIONS = {
+            1,
+            5,
+            10,
+            SearchCondition.DEFAULT_RESULT_LIMIT,
+            100,
+            200,
+            500,
+            1000
+    };
+
     public static void showLocationRegistrationDialog(MainActivity activity) {
         DialogHelper dialog = new DialogHelper(
                 activity,
@@ -60,6 +71,7 @@ public class DialogHelper {
         builder.setTitle("検索条件");
 
         Spinner categorySpinner = dialogView.findViewById(R.id.spSearchCategory);
+        Spinner resultLimitSpinner = dialogView.findViewById(R.id.spSearchResultLimit);
         EditText subCategoryField = dialogView.findViewById(R.id.etSearchSubCategory);
         TextView fromText = dialogView.findViewById(R.id.tvSearchFrom);
         TextView toText = dialogView.findViewById(R.id.tvSearchTo);
@@ -70,6 +82,7 @@ public class DialogHelper {
 
         SearchCondition currentCondition = activity.getCurrentSearchCondition();
         setupSearchCategorySpinner(activity, categorySpinner, currentCondition.getCategory());
+        setupResultLimitSpinner(activity, resultLimitSpinner, currentCondition.getResultLimit());
         setTextIfPresent(subCategoryField, currentCondition.getSubCategory());
         setTextIfPresent(fromText, currentCondition.getFromTimestamp());
         setTextIfPresent(toText, currentCondition.getToTimestamp());
@@ -104,6 +117,7 @@ public class DialogHelper {
                 SearchCondition condition = buildSearchCondition(
                         activity,
                         categorySpinner,
+                        resultLimitSpinner,
                         subCategoryField,
                         fromText,
                         toText,
@@ -124,6 +138,7 @@ public class DialogHelper {
             dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
                 clearSearchConditionInputs(
                         categorySpinner,
+                        resultLimitSpinner,
                         subCategoryField,
                         fromText,
                         toText,
@@ -161,9 +176,31 @@ public class DialogHelper {
         }
     }
 
+    private static void setupResultLimitSpinner(Context context, Spinner spinner, Integer selectedLimit) {
+        ArrayAdapter<Integer> adapter = new ArrayAdapter<>(
+                context,
+                android.R.layout.simple_spinner_item,
+                SEARCH_RESULT_LIMIT_OPTIONS
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        int safeSelectedLimit = selectedLimit != null
+                ? selectedLimit
+                : SearchCondition.DEFAULT_RESULT_LIMIT;
+        for (int i = 0; i < SEARCH_RESULT_LIMIT_OPTIONS.length; i++) {
+            if (SEARCH_RESULT_LIMIT_OPTIONS[i] == safeSelectedLimit) {
+                spinner.setSelection(i);
+                return;
+            }
+        }
+        spinner.setSelection(getDefaultResultLimitPosition());
+    }
+
     private static SearchCondition buildSearchCondition(
             Context context,
             Spinner categorySpinner,
+            Spinner resultLimitSpinner,
             EditText subCategoryField,
             TextView fromText,
             TextView toText,
@@ -188,6 +225,7 @@ public class DialogHelper {
         }
 
         String selectedCategory = normalizeText(String.valueOf(categorySpinner.getSelectedItem()));
+        Integer resultLimit = (Integer) resultLimitSpinner.getSelectedItem();
 
         return new SearchCondition(
                 selectedCategory,
@@ -197,7 +235,8 @@ public class DialogHelper {
                 keywordField.getText().toString(),
                 hasPhotoCheck.isChecked() ? Boolean.TRUE : null,
                 unsentOnlyCheck.isChecked() ? Boolean.FALSE : null,
-                radiusMeters
+                radiusMeters,
+                resultLimit
         );
     }
 
@@ -265,6 +304,7 @@ public class DialogHelper {
 
     private static void clearSearchConditionInputs(
             Spinner categorySpinner,
+            Spinner resultLimitSpinner,
             EditText subCategoryField,
             TextView fromText,
             TextView toText,
@@ -274,6 +314,7 @@ public class DialogHelper {
             CheckBox unsentOnlyCheck
     ) {
         categorySpinner.setSelection(0);
+        resultLimitSpinner.setSelection(getDefaultResultLimitPosition());
         subCategoryField.setText("");
         fromText.setText("");
         toText.setText("");
@@ -281,6 +322,15 @@ public class DialogHelper {
         radiusField.setText("");
         hasPhotoCheck.setChecked(false);
         unsentOnlyCheck.setChecked(false);
+    }
+
+    private static int getDefaultResultLimitPosition() {
+        for (int i = 0; i < SEARCH_RESULT_LIMIT_OPTIONS.length; i++) {
+            if (SEARCH_RESULT_LIMIT_OPTIONS[i] == SearchCondition.DEFAULT_RESULT_LIMIT) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     private final Context context;

@@ -73,6 +73,10 @@ public class SearchCondition {
                 || radiusMeters != null;
     }
 
+    public boolean hasCustomResultLimit() {
+        return resultLimit != null && resultLimit != DEFAULT_RESULT_LIMIT;
+    }
+
     public static SearchCondition createDefault() {
         return new SearchCondition(
                 null,
