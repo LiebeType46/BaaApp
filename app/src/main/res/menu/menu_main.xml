@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menu_item1"
-        android:title="Register Location"/>
+        android:title="地点登録"/>
     <item
         android:id="@+id/menu_item2"
-        android:title="Csv Import" />
+        android:title="CSVインポート" />
     <item android:id="@+id/menu_item3"
-        android:title="Option 3"/>
+        android:title="サーバーアップロード"/>
     <item
         android:id="@+id/menu_item4"
         android:title="検索条件" />

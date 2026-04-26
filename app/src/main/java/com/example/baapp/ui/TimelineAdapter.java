@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.baapp.R;
+import com.example.baapp.common.CategoryLabelResolver;
+import com.example.baapp.common.MainCategoryConverter;
 import com.example.baapp.data.LocationEntity;
 
 import java.util.ArrayList;
@@ -47,9 +49,14 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
     @Override
     public void onBindViewHolder(@NonNull TimelineViewHolder holder, int position) {
         LocationEntity item = items.get(position);
+        String categoryLabel = CategoryLabelResolver.getLabel(
+                holder.itemView.getContext(),
+                MainCategoryConverter.toCategory(item.getCategory())
+        );
+        String subCategory = item.getSubCategory() != null ? item.getSubCategory() : "";
 
         holder.tvCategorySubCategory.setText(
-                item.getCategory() + " / " + item.getSubCategory()
+                categoryLabel + " / " + subCategory
         );
 
         holder.tvLocationTimestamp.setText(String.format(

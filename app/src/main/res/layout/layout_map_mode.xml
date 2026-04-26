@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:contentDescription="Menu"
+        android:contentDescription="メニュー"
         android:layout_gravity="bottom|start"
         app:srcCompat="@android:drawable/ic_menu_more" />
 

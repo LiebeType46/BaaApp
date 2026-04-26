@@ -19,6 +19,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.baapp.Csv.CsvImporter;
 import com.example.baapp.common.ConstCode;
+import com.example.baapp.common.LanguageService;
 import com.example.baapp.data.AppDatabase;
 import com.example.baapp.data.LocationEntity;
 import com.example.baapp.data.SearchConditionEntity;
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private TimelineAdapter timelineAdapter;
     private SearchCondition currentSearchCondition = new SearchCondition();
     private SearchCondition defaultSearchCondition = SearchCondition.createDefault();
-    private boolean focusingLocationFromIntent = false;
+    private LanguageService language;
 
 
     @Override
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Configuration.getInstance().load(ctx, getSharedPreferences("osmdroid", Context.MODE_PRIVATE));
 
         setContentView(R.layout.activity_main);
+        language = LanguageService.get(this);
 
         mapModeContainer = findViewById(R.id.mapModeContainer);
         timelineModeContainer = findViewById(R.id.timelineModeContainer);
@@ -101,6 +103,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         bottomNavigation = findViewById(R.id.bottomNavigation);
         fabPost = findViewById(R.id.fabPost);
         fabTimelineSearch = findViewById(R.id.fabTimelineSearch);
+        fabMenu.setContentDescription(language.t("common.menu"));
+        fabPost.setContentDescription(language.t("common.post"));
+        fabTimelineSearch.setContentDescription(language.t("common.search"));
+        btnCenterOnCurrentLocation.setContentDescription(language.t("main.center_on_current_location"));
 
         // パーミッション確認
         if (!LocationPermissionHelper.hasLocationPermission(this)) {
@@ -127,28 +133,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         // LocationService 初期化
         locationService = LocationService.getInstance(this);
-        focusingLocationFromIntent = hasFocusLocationIntent(getIntent());
 
         GeoPoint lastLocation = locationService.getLastKnownLocation(this);
         if (lastLocation != null) {
             lastLocationPoint = lastLocation;
             mapView.post(() -> {
-                if (!focusingLocationFromIntent) {
-                    mapService.updateMapCenter(lastLocation, 15.0);
-                }
+                mapService.updateMapCenter(lastLocation, 15.0);
                 reloadMapMarkers(lastLocation);
             });
 
-            Toast.makeText(this, R.string.use_last_location, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, language.t("main.use_last_location"), Toast.LENGTH_LONG).show();
         }
 
         // 非同期で現在地を取得 → 反映
         locationService.getCurrentLocationAsync(ctx, (GeoPoint location) -> {
             if (location != null) {
-                markerManager.updateCurrentLocation(this, location, this.getString(R.string.current_location));
+                markerManager.updateCurrentLocation(this, location, language.t("main.current_location"));
                 // 🔥 中心移動を遅延実行
                 if (!isFinishing() && !isDestroyed()) {
-                    if (!focusingLocationFromIntent && lastLocationPoint != null) {
+                    if (lastLocationPoint != null) {
                         GeoPoint center = (GeoPoint) mapView.getMapCenter();
                         if (MapUtils.isNearCenter(center, lastLocationPoint, 50)) {
                             mapView.getController().setCenter(location);
@@ -157,10 +160,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     lastLocationPoint = location;
                     reloadMapMarkers(location);
 
-                    Toast.makeText(this, R.string.get_current_location, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, language.t("main.get_current_location"), Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this, R.string.error_get_current_location, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, language.t("main.error_get_current_location"), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -174,11 +177,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     : locationService.getLastKnownLocation(this);
 
             if (point != null) {
-                focusingLocationFromIntent = false;
                 mapView.getController().setCenter(point);
-                Toast.makeText(this, R.string.center_on_current_location, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, language.t("main.center_on_current_location"), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, R.string.error_get_current_location, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, language.t("main.error_get_current_location"), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -211,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         });
 
         showMapMode();
-        mapView.post(() -> handleFocusLocationIntent(getIntent()));
+        handleFocusLocationIntent(getIntent());
     }
 
 
@@ -238,9 +240,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         locationService.startLocationPolling(this, point -> {
             if (point != null) {
-                markerManager.updateCurrentLocation(this, point, this.getString(R.string.current_location));
+                markerManager.updateCurrentLocation(this, point, language.t("main.current_location"));
 
-                if (!focusingLocationFromIntent && lastLocationPoint != null) {
+                if (lastLocationPoint != null) {
                     GeoPoint center = (GeoPoint) mapView.getMapCenter();
                     if (MapUtils.isNearCenter(center, lastLocationPoint, 50)) {
                         mapView.getController().setCenter(point);
@@ -280,9 +282,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         if (requestCode == 1001) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, R.string.permitted_gps, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, language.t("main.permitted_gps"), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, R.string.denied_gps, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, language.t("main.denied_gps"), Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -314,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             CsvImporter importer = new CsvImporter(db);
             importer.importFromCsv(this, fileUri);
 
-            Toast.makeText(this, R.string.complete_import_csv, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, language.t("csv.complete_import"), Toast.LENGTH_SHORT).show();
 
             // CSVインポート完了メッセージの後
             GeoPoint lastLocation = locationService.getLastKnownLocation(this);
@@ -326,8 +328,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        focusingLocationFromIntent = hasFocusLocationIntent(intent);
-        mapView.post(() -> handleFocusLocationIntent(intent));
+        handleFocusLocationIntent(intent);
     }
 
     public MarkerManager getMarkerManager() {
@@ -365,13 +366,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         showMapMode();
         mapService.focusOnLocation(entity, markerManager);
-        bottomNavigation.setSelectedItemId(R.id.navigation_map);
 
         intent.removeExtra(EXTRA_FOCUS_LOCATION_ID);
-    }
-
-    private boolean hasFocusLocationIntent(Intent intent) {
-        return intent != null && intent.getIntExtra(EXTRA_FOCUS_LOCATION_ID, -1) != -1;
     }
 
     public void showAccountOptions() {
@@ -379,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         timelineModeContainer.setVisibility(View.GONE);
         accountModeContainer.setVisibility(View.VISIBLE);
 
-        Toast.makeText(this, "アカウント画面は未実装", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, language.t("main.account_unimplemented"), Toast.LENGTH_SHORT).show();
     }
 
     public SearchCondition getCurrentSearchCondition() {

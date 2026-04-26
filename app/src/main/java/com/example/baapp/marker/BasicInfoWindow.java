@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.example.baapp.LocationDetailActivity;
 import com.example.baapp.R;
 import com.example.baapp.common.CategoryLabelResolver;
+import com.example.baapp.common.LanguageService;
 import com.example.baapp.common.MainCategoryConverter;
 import com.example.baapp.data.LocationEntity;
 
@@ -38,6 +39,8 @@ public class BasicInfoWindow extends InfoWindow {
         TextView memoView = mView.findViewById(R.id.info_memo);
         ImageView imageView = mView.findViewById(R.id.info_image);
         TextView detailLinkView = mView.findViewById(R.id.tvOpenDetail);
+        LanguageService language = LanguageService.get(mView.getContext());
+        detailLinkView.setText(language.t("detail.open_post_detail"));
 
         if (marker.getRelatedObject() instanceof LocationEntity) {
             LocationEntity entity = (LocationEntity) marker.getRelatedObject();

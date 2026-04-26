@@ -13,7 +13,7 @@
             android:id="@+id/tvCategorySubCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="category / subCategory"
+            android:text="カテゴリ / サブカテゴリ"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -22,14 +22,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="lat, lon / timestamp" />
+            android:text="緯度, 経度 / 時刻" />
 
         <TextView
             android:id="@+id/tvMemo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="memo"
+            android:text="メモ"
             android:textSize="16sp" />
 
         <ImageView

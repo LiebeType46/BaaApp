@@ -10,6 +10,7 @@
         android:padding="16dp">
 
         <TextView
+            android:id="@+id/tvSearchCategoryLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="4dp"
@@ -22,6 +23,7 @@
             android:layout_height="wrap_content" />
 
         <TextView
+            android:id="@+id/tvSearchResultLimitLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -42,6 +44,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tvSearchSubCategoryLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -75,6 +78,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tvSearchFromLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -114,6 +118,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tvSearchToLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -153,6 +158,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tvSearchKeywordLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -186,6 +192,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tvSearchRadiusLabel"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

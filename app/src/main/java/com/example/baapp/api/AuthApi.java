@@ -1,5 +1,8 @@
 package com.example.baapp.api;
 
+import android.content.Context;
+
+import com.example.baapp.common.LanguageService;
 import com.example.baapp.login.AuthResponse;
 import com.example.baapp.login.LoginRequest;
 import com.google.gson.Gson;
@@ -54,7 +57,8 @@ public class AuthApi {
         call.enqueue(callback);
     }
 
-    public static void register(String username, String email, String password, AuthResultCallback callback) {
+    public static void register(Context context, String username, String email, String password, AuthResultCallback callback) {
+        LanguageService language = LanguageService.get(context);
         try {
             JSONObject body = new JSONObject();
             body.put("username", username);
@@ -69,7 +73,7 @@ public class AuthApi {
             client.newCall(req).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    callback.onError("Network error: " + e.getMessage());
+                    callback.onError(language.format("register.network_error", e.getMessage()));
                 }
 
                 @Override
@@ -77,7 +81,7 @@ public class AuthApi {
                     String resBody = response.body() != null ? response.body().string() : "";
 
                     if (!response.isSuccessful()) {
-                        callback.onError("HTTP " + response.code() + "\n" + resBody);
+                        callback.onError(language.format("register.http_error", response.code(), resBody));
                         return;
                     }
 
@@ -86,20 +90,20 @@ public class AuthApi {
 
                         if (resObj == null || resObj.token == null || resObj.token.isEmpty()
                                 || resObj.publicId == null || resObj.publicId.isEmpty()) {
-                            callback.onError("Login OK but invalid response body.\n" + resBody);
+                            callback.onError(language.format("register.invalid_response", resBody));
                             return;
                         }
 
                         callback.onSuccess(resObj);
 
                     } catch (Exception e) {
-                        callback.onError("Parse error: " + e.getMessage() + "\n" + resBody);
+                        callback.onError(language.format("register.parse_error", e.getMessage(), resBody));
                     }
                 }
             });
 
         } catch (Exception e) {
-            callback.onError("Error: " + e.getMessage());
+            callback.onError(language.format("register.error", e.getMessage()));
         }
     }
 }
