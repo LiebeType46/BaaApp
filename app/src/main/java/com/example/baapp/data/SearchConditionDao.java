@@ -11,6 +11,9 @@ public interface SearchConditionDao {
     @Query("SELECT * FROM search_condition WHERE id = 'current' LIMIT 1")
     SearchConditionEntity getCurrent();
 
+    @Query("SELECT * FROM search_condition WHERE id = 'default' LIMIT 1")
+    SearchConditionEntity getDefault();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void save(SearchConditionEntity entity);
 

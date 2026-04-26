@@ -21,6 +21,7 @@ import com.example.baapp.Csv.CsvImporter;
 import com.example.baapp.common.ConstCode;
 import com.example.baapp.data.AppDatabase;
 import com.example.baapp.data.LocationEntity;
+import com.example.baapp.data.SearchConditionEntity;
 import com.example.baapp.location.LocationPermissionHelper;
 import com.example.baapp.location.LocationService;
 import com.example.baapp.map.MapService;
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private SwipeRefreshLayout swipeTimeline;
     private TimelineAdapter timelineAdapter;
     private SearchCondition currentSearchCondition = new SearchCondition();
+    private SearchCondition defaultSearchCondition = SearchCondition.createDefault();
 
 
     @Override
@@ -384,7 +386,27 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void loadCurrentSearchCondition() {
+        ensureDefaultSearchCondition();
         currentSearchCondition = SearchConditionMapper.toDto(db.searchConditionDao().getCurrent());
+    }
+
+    private void ensureDefaultSearchCondition() {
+        defaultSearchCondition = SearchConditionMapper.toDto(db.searchConditionDao().getDefault());
+        if (defaultSearchCondition.getResultLimit() == null) {
+            defaultSearchCondition = SearchCondition.createDefault();
+            db.searchConditionDao().save(
+                    SearchConditionMapper.toEntity(
+                            defaultSearchCondition,
+                            SearchConditionEntity.DEFAULT_ID
+                    )
+            );
+        }
+    }
+
+    private SearchCondition getEffectiveSearchCondition() {
+        return getCurrentSearchCondition().hasAnyCondition()
+                ? getCurrentSearchCondition()
+                : defaultSearchCondition;
     }
 
     private void reloadBySearchCondition() {
@@ -400,12 +422,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
         GeoPoint searchCenter = getMapSearchCenter(fallbackCenter);
-        GeoPoint sortReference = searchCenter != null ? searchCenter : lastLocationPoint;
-        List<LocationEntity> sourceLocations = getCurrentSearchCondition().hasAnyCondition()
-                ? locationService.getAllLocationsLatestFirst()
-                : locationService.getRecentLocationsSortedByDistance(this, sortReference);
+        SearchCondition condition = getEffectiveSearchCondition();
+        List<LocationEntity> sourceLocations = locationService.getAllLocationsLatestFirst();
         List<LocationEntity> filteredLocations =
-                filterLocationsBySearchCondition(sourceLocations, true, searchCenter);
+                filterLocationsBySearchCondition(sourceLocations, condition, true, searchCenter);
+        filteredLocations = limitLocations(filteredLocations, condition.getResultLimit());
 
         markerManager.removeMarkers(displayedMarkers);
         markerManager.initMarkers(filteredLocations);
@@ -424,37 +445,22 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void loadTimelinePosts() {
-        List<LocationEntity> sourcePosts = hasTimelineSearchCondition()
-                ? locationService.getAllLocationsLatestFirst()
-                : locationService.getLatestLocations(100);
+        SearchCondition condition = getEffectiveSearchCondition();
+        List<LocationEntity> sourcePosts = locationService.getAllLocationsLatestFirst();
         List<LocationEntity> filteredPosts =
-                filterLocationsBySearchCondition(sourcePosts, false, null);
-
-        if (filteredPosts.size() > 100) {
-            filteredPosts = new ArrayList<>(filteredPosts.subList(0, 100));
-        }
+                filterLocationsBySearchCondition(sourcePosts, condition, false, null);
+        filteredPosts = limitLocations(filteredPosts, condition.getResultLimit());
 
         timelineAdapter.setItems(filteredPosts);
     }
 
-    private boolean hasTimelineSearchCondition() {
-        SearchCondition condition = getCurrentSearchCondition();
-        return condition.getCategory() != null
-                || condition.getSubCategory() != null
-                || condition.getFromTimestamp() != null
-                || condition.getToTimestamp() != null
-                || condition.getMemoKeyword() != null
-                || condition.getHasPhoto() != null
-                || condition.getUploadFlg() != null;
-    }
-
     private List<LocationEntity> filterLocationsBySearchCondition(
             List<LocationEntity> locations,
+            SearchCondition condition,
             boolean includeRadius,
             GeoPoint radiusCenter
     ) {
         List<LocationEntity> filtered = new ArrayList<>();
-        SearchCondition condition = getCurrentSearchCondition();
         Date fromDate = parseTimestamp(condition.getFromTimestamp());
         Date toDate = parseTimestamp(condition.getToTimestamp());
 
@@ -469,6 +475,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
         return filtered;
+    }
+
+    private List<LocationEntity> limitLocations(List<LocationEntity> locations, Integer resultLimit) {
+        if (locations == null || resultLimit == null || locations.size() <= resultLimit) {
+            return locations;
+        }
+
+        return new ArrayList<>(locations.subList(0, resultLimit));
     }
 
     private boolean matchesSearchCondition(

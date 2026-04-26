@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey;
 public class SearchConditionEntity {
 
     public static final String CURRENT_ID = "current";
+    public static final String DEFAULT_ID = "default";
 
     @PrimaryKey
     @NonNull
@@ -21,6 +22,7 @@ public class SearchConditionEntity {
     public Boolean hasPhoto;
     public Boolean uploadFlg;
     public Double radiusMeters;
+    public Integer resultLimit;
 
     public SearchConditionEntity() {
     }
