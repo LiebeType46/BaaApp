@@ -17,6 +17,16 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabTimelineSearch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:contentDescription="検索"
+        app:fabSize="mini"
+        app:srcCompat="@android:drawable/ic_menu_search" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabPost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
