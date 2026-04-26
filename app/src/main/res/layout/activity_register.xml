@@ -10,9 +10,10 @@
         android:padding="24dp">
 
         <TextView
+            android:id="@+id/tvRegisterTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Register"
+            android:text="新規登録"
             android:textSize="24sp"
             android:paddingBottom="16dp"/>
 
@@ -20,7 +21,7 @@
             android:id="@+id/etUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="username"
+            android:hint="ユーザー名"
             android:inputType="textPersonName"
             android:autofillHints="username"/>
 
@@ -28,7 +29,7 @@
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="email"
+            android:hint="メールアドレス"
             android:inputType="textEmailAddress"
             android:autofillHints="emailAddress"
             android:layout_marginTop="12dp"/>
@@ -37,7 +38,7 @@
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="password"
+            android:hint="パスワード"
             android:inputType="textPassword"
             android:autofillHints="password"
             android:layout_marginTop="12dp"/>
@@ -46,7 +47,7 @@
             android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Register"
+            android:text="登録"
             android:layout_marginTop="18dp"/>
 
         <ProgressBar
@@ -68,7 +69,7 @@
             android:id="@+id/btnBackToLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Back to Login"
+            android:text="ログインに戻る"
             android:layout_marginTop="12dp"/>
 
     </LinearLayout>

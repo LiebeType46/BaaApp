@@ -9,13 +9,13 @@
         android:id="@+id/etIdentifier"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Username or Email" />
+        android:hint="ユーザー名またはメールアドレス" />
 
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Password"
+        android:hint="パスワード"
         android:inputType="textPassword"
         android:layout_marginTop="12dp"/>
 
@@ -23,14 +23,14 @@
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login"
+        android:text="ログイン"
         android:layout_marginTop="16dp"/>
 
     <Button
         android:id="@+id/btnGoRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Register"
+        android:text="新規登録"
         android:layout_marginTop="8dp"/>
 
     <TextView

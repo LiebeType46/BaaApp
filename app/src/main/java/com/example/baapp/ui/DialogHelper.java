@@ -23,6 +23,8 @@ import androidx.annotation.NonNull;
 
 import com.example.baapp.MainActivity;
 import com.example.baapp.R;
+import com.example.baapp.common.CategoryLabelResolver;
+import com.example.baapp.common.LanguageService;
 import com.example.baapp.common.MainCategory;
 import com.example.baapp.location.LocationService;
 import com.example.baapp.photo.PhotoService;
@@ -67,8 +69,9 @@ public class DialogHelper {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         LayoutInflater inflater = LayoutInflater.from(activity);
         View dialogView = inflater.inflate(R.layout.dialog_search_condition, null);
+        LanguageService language = LanguageService.get(activity);
         builder.setView(dialogView);
-        builder.setTitle("検索条件");
+        builder.setTitle(language.t("dialog.search_condition.title"));
 
         Spinner categorySpinner = dialogView.findViewById(R.id.spSearchCategory);
         Spinner resultLimitSpinner = dialogView.findViewById(R.id.spSearchResultLimit);
@@ -81,6 +84,7 @@ public class DialogHelper {
         CheckBox unsentOnlyCheck = dialogView.findViewById(R.id.cbUnsentOnly);
 
         SearchCondition currentCondition = activity.getCurrentSearchCondition();
+        applySearchConditionLabels(language, dialogView);
         setupSearchCategorySpinner(activity, categorySpinner, currentCondition.getCategory());
         setupResultLimitSpinner(activity, resultLimitSpinner, currentCondition.getResultLimit());
         setTextIfPresent(subCategoryField, currentCondition.getSubCategory());
@@ -107,9 +111,9 @@ public class DialogHelper {
         dialogView.findViewById(R.id.tvClearSearchRadius)
                 .setOnClickListener(v -> radiusField.setText(""));
 
-        builder.setPositiveButton("適用", null);
-        builder.setNeutralButton("全体クリア", null);
-        builder.setNegativeButton(activity.getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+        builder.setPositiveButton(language.t("common.apply"), null);
+        builder.setNeutralButton(language.t("common.clear_all"), null);
+        builder.setNegativeButton(language.t("common.cancel"), (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> {
@@ -215,11 +219,19 @@ public class DialogHelper {
             try {
                 radiusMeters = Double.parseDouble(radiusText);
                 if (radiusMeters < 0) {
-                    Toast.makeText(context, "半径は0以上で入力してください", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(
+                            context,
+                            LanguageService.get(context).t("dialog.search_condition.radius_positive"),
+                            Toast.LENGTH_SHORT
+                    ).show();
                     return null;
                 }
             } catch (NumberFormatException e) {
-                Toast.makeText(context, "半径は数値で入力してください", Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        context,
+                        LanguageService.get(context).t("dialog.search_condition.radius_number"),
+                        Toast.LENGTH_SHORT
+                ).show();
                 return null;
             }
         }
@@ -291,6 +303,28 @@ public class DialogHelper {
         if (value != null) {
             view.setText(value);
         }
+    }
+
+    private static void applySearchConditionLabels(LanguageService language, View dialogView) {
+        language.setText(dialogView, R.id.tvSearchCategoryLabel, "dialog.search_condition.category");
+        language.setText(dialogView, R.id.tvSearchResultLimitLabel, "dialog.search_condition.result_limit");
+        language.setText(dialogView, R.id.tvSearchSubCategoryLabel, "dialog.search_condition.sub_category");
+        language.setText(dialogView, R.id.tvClearSearchSubCategory, "common.clear");
+        language.setHint(dialogView, R.id.etSearchSubCategory, "dialog.search_condition.sub_category_hint");
+        language.setText(dialogView, R.id.tvSearchFromLabel, "dialog.search_condition.from");
+        language.setText(dialogView, R.id.tvClearSearchFrom, "common.clear");
+        language.setHint(dialogView, R.id.tvSearchFrom, "dialog.search_condition.unspecified");
+        language.setText(dialogView, R.id.tvSearchToLabel, "dialog.search_condition.to");
+        language.setText(dialogView, R.id.tvClearSearchTo, "common.clear");
+        language.setHint(dialogView, R.id.tvSearchTo, "dialog.search_condition.unspecified");
+        language.setText(dialogView, R.id.tvSearchKeywordLabel, "dialog.search_condition.memo_keyword");
+        language.setText(dialogView, R.id.tvClearSearchKeyword, "common.clear");
+        language.setHint(dialogView, R.id.etSearchKeyword, "dialog.search_condition.keyword_hint");
+        language.setText(dialogView, R.id.tvSearchRadiusLabel, "dialog.search_condition.radius");
+        language.setText(dialogView, R.id.tvClearSearchRadius, "common.clear");
+        language.setHint(dialogView, R.id.etSearchRadius, "dialog.search_condition.unspecified");
+        language.setText(dialogView, R.id.cbHasPhoto, "dialog.search_condition.has_photo");
+        language.setText(dialogView, R.id.cbUnsentOnly, "dialog.search_condition.unsent_only");
     }
 
     private static String normalizeText(String value) {
@@ -365,9 +399,12 @@ public class DialogHelper {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = LayoutInflater.from(context);
         View dialogView = inflater.inflate(R.layout.dialog_registration, null);
+        LanguageService language = LanguageService.get(context);
         builder.setView(dialogView);
+        builder.setTitle(language.t("dialog.register_location.title"));
 
         categorySpinner = dialogView.findViewById(R.id.categorySpinner);
+        applyLocationRegistrationLabels(language, dialogView);
 
         ArrayAdapter<MainCategory> adapter =
                 new ArrayAdapter<MainCategory>(
@@ -380,7 +417,7 @@ public class DialogHelper {
                     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                         View view = super.getView(position, convertView, parent);
                         TextView tv = (TextView) view;
-                        tv.setText(context.getString(Objects.requireNonNull(getItem(position)).getLabel()));
+                        tv.setText(CategoryLabelResolver.getLabel(context, Objects.requireNonNull(getItem(position))));
                         return view;
                     }
 
@@ -388,7 +425,7 @@ public class DialogHelper {
                     public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
                         View view = super.getDropDownView(position, convertView, parent);
                         TextView tv = (TextView) view;
-                        tv.setText(context.getString(Objects.requireNonNull(getItem(position)).getLabel()));
+                        tv.setText(CategoryLabelResolver.getLabel(context, Objects.requireNonNull(getItem(position))));
                         return view;
                     }
                 };
@@ -412,8 +449,8 @@ public class DialogHelper {
 
         initializeDialogFields();
 
-        builder.setPositiveButton(context.getString(R.string.btn_register), (dialog, which) -> saveLocation());
-        builder.setNegativeButton(context.getString(R.string.cancel), (dialog, which) -> dialog.dismiss());
+        builder.setPositiveButton(language.t("common.register"), (dialog, which) -> saveLocation());
+        builder.setNegativeButton(language.t("common.cancel"), (dialog, which) -> dialog.dismiss());
 
         builder.create().show();
     }
@@ -427,8 +464,8 @@ public class DialogHelper {
                 if (location != null) {
                     setLocationFields(location);
                 } else {
-                    latitudeField.setText(context.getString(R.string.error_fail_get));
-                    longitudeField.setText(context.getString(R.string.error_fail_get));
+                    latitudeField.setText(LanguageService.get(context).t("error.fail_get"));
+                    longitudeField.setText(LanguageService.get(context).t("error.fail_get"));
                     timestampField.setText("");
                 }
             });
@@ -461,7 +498,7 @@ public class DialogHelper {
             locationService.saveLocation(category, subCategory, latitude, longitude, timestamp, memo, uploadFlg, uriStr);
             Toast.makeText(
                     context,
-                    context.getString(R.string.complete_register) + category,
+                    LanguageService.get(context).t("register.complete") + category,
                     Toast.LENGTH_SHORT
             ).show();
 
@@ -469,18 +506,23 @@ public class DialogHelper {
                 listener.onLocationSaved();
             }
         } catch (NumberFormatException e) {
-            Toast.makeText(context, R.string.error_invalid_location, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, LanguageService.get(context).t("error.invalid_location"), Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, R.string.error_fail_register, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, LanguageService.get(context).t("error.fail_register"), Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showPhotoOptionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        String[] options = {context.getString(R.string.take_photo), context.getString(R.string.select_picture), context.getString(R.string.cancel)};
+        LanguageService language = LanguageService.get(context);
+        String[] options = {
+                language.t("photo.take_photo"),
+                language.t("photo.select_picture"),
+                language.t("common.cancel")
+        };
 
-        builder.setTitle(context.getString(R.string.add_picture))
+        builder.setTitle(language.t("photo.add_picture"))
                 .setItems(options, (dialog, which) -> {
                     switch (which) {
                         case 0:
@@ -497,15 +539,15 @@ public class DialogHelper {
                                             photoPreview.setVisibility(View.VISIBLE);
                                             photoPreview.setImageBitmap(thumbnail);
                                         } else {
-                                            Toast.makeText(context, R.string.error_read_picture, Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, language.t("error.read_picture"), Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (IOException e) {
                                         e.printStackTrace();
-                                        Toast.makeText(context, R.string.error_process_picture, Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, language.t("error.process_picture"), Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             } catch (IOException e) {
-                                Toast.makeText(context, R.string.error_launch_camera, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, language.t("error.launch_camera"), Toast.LENGTH_SHORT).show();
                             }
 
                             break;
@@ -522,11 +564,11 @@ public class DialogHelper {
                                         photoPreview.setVisibility(View.VISIBLE);
                                         photoPreview.setImageBitmap(thumbnail);
                                     } else {
-                                        Toast.makeText(context, R.string.error_read_picture, Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, language.t("error.read_picture"), Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (IOException e) {
                                     e.printStackTrace();
-                                    Toast.makeText(context, R.string.error_process_picture, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, language.t("error.process_picture"), Toast.LENGTH_SHORT).show();
                                 }
                             });
                             break;
@@ -535,6 +577,17 @@ public class DialogHelper {
                             dialog.dismiss();
                     }
                 }).show();
+    }
+
+    private void applyLocationRegistrationLabels(LanguageService language, View dialogView) {
+        language.setText(dialogView, R.id.tvRegistrationCategoryLabel, "dialog.register_location.category");
+        language.setText(dialogView, R.id.tvRegistrationSubCategoryLabel, "dialog.register_location.sub_category");
+        language.setHint(dialogView, R.id.subCategoryEditText, "dialog.register_location.sub_category_hint");
+        language.setHint(dialogView, R.id.latitudeField, "dialog.register_location.latitude_hint");
+        language.setHint(dialogView, R.id.longitudeField, "dialog.register_location.longitude_hint");
+        language.setHint(dialogView, R.id.timestampField, "dialog.register_location.timestamp_hint");
+        language.setHint(dialogView, R.id.memoField, "dialog.register_location.memo_hint");
+        language.setText(dialogView, R.id.btnAddPhoto, "dialog.register_location.add_photo");
     }
 
 }

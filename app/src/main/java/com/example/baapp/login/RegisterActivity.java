@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.baapp.MainActivity;
 import com.example.baapp.R;
 import com.example.baapp.api.AuthApi;
+import com.example.baapp.common.LanguageService;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -27,12 +28,16 @@ public class RegisterActivity extends AppCompatActivity {
     private Button btnBackToLogin;
     private ProgressBar progress;
     private TextView tvResult;
+    private TextView tvRegisterTitle;
+    private LanguageService language;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        language = LanguageService.get(this);
 
+        tvRegisterTitle = findViewById(R.id.tvRegisterTitle);
         etUsername = findViewById(R.id.etUsername);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
@@ -40,6 +45,7 @@ public class RegisterActivity extends AppCompatActivity {
         btnBackToLogin = findViewById(R.id.btnBackToLogin);
         progress = findViewById(R.id.progress);
         tvResult = findViewById(R.id.tvResult);
+        applyLanguage();
 
         btnRegister.setOnClickListener(v -> doRegister());
         btnBackToLogin.setOnClickListener(v -> finish()); // Loginから起動してる想定なら戻るだけでOK
@@ -51,14 +57,14 @@ public class RegisterActivity extends AppCompatActivity {
         String password = etPassword.getText().toString();
 
         if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-            tvResult.setText("Please fill all fields.");
+            tvResult.setText(language.t("register.fill_all"));
             return;
         }
 
         setLoading(true);
         tvResult.setText("");
 
-        AuthApi.register(username, email, password, new AuthApi.AuthResultCallback() {
+        AuthApi.register(this, username, email, password, new AuthApi.AuthResultCallback() {
             @Override
             public void onSuccess(AuthResponse response) {
                 runOnUiThread(() -> {
@@ -89,5 +95,14 @@ public class RegisterActivity extends AppCompatActivity {
         progress.setVisibility(loading ? View.VISIBLE : View.GONE);
         btnRegister.setEnabled(!loading);
         btnBackToLogin.setEnabled(!loading);
+    }
+
+    private void applyLanguage() {
+        tvRegisterTitle.setText(language.t("register.title"));
+        etUsername.setHint(language.t("register.username_hint"));
+        etEmail.setHint(language.t("register.email_hint"));
+        etPassword.setHint(language.t("register.password_hint"));
+        btnRegister.setText(language.t("register.button"));
+        btnBackToLogin.setText(language.t("register.back_to_login"));
     }
 }

@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.baapp.data.LocationEntity;
+import com.example.baapp.common.LanguageService;
 import com.example.baapp.location.LocationService;
 import com.example.baapp.photo.PhotoService;
 
@@ -37,6 +38,9 @@ public class LocationDetailActivity extends AppCompatActivity {
         tvMemo = findViewById(R.id.tvMemo);
         ivPhoto = findViewById(R.id.ivPhoto);
         tvOpenMap = findViewById(R.id.tvOpenMap);
+        LanguageService language = LanguageService.get(this);
+        ivPhoto.setContentDescription(language.t("photo.image_description"));
+        tvOpenMap.setText(language.t("detail.open_map"));
 
         int locationId = getIntent().getIntExtra("location_id", -1);
         if (locationId == -1) {

@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.baapp.MainActivity;
 import com.example.baapp.R;
 import com.example.baapp.api.AuthApi;
+import com.example.baapp.common.LanguageService;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -28,15 +29,18 @@ public class LoginActivity extends AppCompatActivity {
     private EditText etIdentifier;
     private EditText etPassword;
     private TextView tvStatus;
+    private LanguageService language;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        language = LanguageService.get(this);
 
         etIdentifier = findViewById(R.id.etIdentifier);
         etPassword   = findViewById(R.id.etPassword);
         tvStatus     = findViewById(R.id.tvStatus);
+        applyLanguage();
 
         findViewById(R.id.btnLogin).setOnClickListener(v -> doLogin());
         findViewById(R.id.btnGoRegister).setOnClickListener(v -> {
@@ -50,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = etPassword.getText().toString();
 
         if (identifier.isEmpty() || password.isEmpty()) {
-            tvStatus.setText("Please input identifier and password.");
+            tvStatus.setText(language.t("login.input_required"));
             return;
         }
 
@@ -62,7 +66,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(() -> tvStatus.setText("Network error"));
+                runOnUiThread(() -> tvStatus.setText(language.t("login.network_error")));
             }
 
             @Override
@@ -71,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
                 String resBody = response.body() != null ? response.body().string() : "";
 
                 if (!response.isSuccessful()) {
-                    runOnUiThread(() -> tvStatus.setText("Login failed: " + response.code()));
+                    runOnUiThread(() -> tvStatus.setText(language.format("login.failed", response.code())));
                     return;
                 }
 
@@ -84,11 +88,18 @@ public class LoginActivity extends AppCompatActivity {
                         .apply();
 
                 runOnUiThread(() -> {
-                    tvStatus.setText("Login OK");
+                    tvStatus.setText(language.t("login.ok"));
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();
                 });
             }
         });
+    }
+
+    private void applyLanguage() {
+        etIdentifier.setHint(language.t("login.identifier_hint"));
+        etPassword.setHint(language.t("login.password_hint"));
+        ((TextView) findViewById(R.id.btnLogin)).setText(language.t("login.login"));
+        ((TextView) findViewById(R.id.btnGoRegister)).setText(language.t("login.register"));
     }
 }

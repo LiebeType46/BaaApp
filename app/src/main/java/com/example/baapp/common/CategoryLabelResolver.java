@@ -25,6 +25,23 @@ public class CategoryLabelResolver {
     }
 
     public static String getLabel(Context context, MainCategory category) {
-        return context.getString(getLabelRes(category));
+        LanguageService language = LanguageService.get(context);
+        if (category == null) {
+            return language.t("category.daily");
+        }
+
+        switch (category) {
+            case EMERGENCY:
+                return language.t("category.emergency");
+            case WARNING:
+                return language.t("category.warning");
+            case INFO:
+                return language.t("category.info");
+            case SUPPORT:
+                return language.t("category.support");
+            case DAILY:
+            default:
+                return language.t("category.daily");
+        }
     }
 }
