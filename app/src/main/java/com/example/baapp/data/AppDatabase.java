@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.baapp.common.MainCategoryConverter;
 
-@Database(entities = {LocationEntity.class, SearchConditionEntity.class}, version = 8, exportSchema = false)
+@Database(entities = {LocationEntity.class, SearchConditionEntity.class}, version = 9, exportSchema = false)
 @TypeConverters({MainCategoryConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -38,6 +38,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             .addMigrations(MIGRATION_5_6)
                             .addMigrations(MIGRATION_6_7)
                             .addMigrations(MIGRATION_7_8)
+                            .addMigrations(MIGRATION_8_9)
                             .build();
                     Log.d("AppDatabase", "AppDatabase initialized");
                 }
@@ -171,6 +172,18 @@ public abstract class AppDatabase extends RoomDatabase {
                             "radiusMeters REAL, " +
                             "PRIMARY KEY(id)" +
                             ")"
+            );
+        }
+    };
+
+    static final Migration MIGRATION_8_9 = new Migration(8, 9) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE search_condition ADD COLUMN resultLimit INTEGER");
+            db.execSQL(
+                    "INSERT OR IGNORE INTO search_condition " +
+                            "(id, category, subCategory, fromTimestamp, toTimestamp, memoKeyword, hasPhoto, uploadFlg, radiusMeters, resultLimit) " +
+                            "VALUES ('default', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 50)"
             );
         }
     };

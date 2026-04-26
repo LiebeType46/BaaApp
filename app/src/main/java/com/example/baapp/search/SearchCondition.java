@@ -2,6 +2,8 @@ package com.example.baapp.search;
 
 public class SearchCondition {
 
+    public static final int DEFAULT_RESULT_LIMIT = 50;
+
     private String category;
     private String subCategory;
     private String fromTimestamp;
@@ -10,6 +12,7 @@ public class SearchCondition {
     private Boolean hasPhoto;
     private Boolean uploadFlg;
     private Double radiusMeters;
+    private Integer resultLimit;
 
     public SearchCondition() {
     }
@@ -24,6 +27,30 @@ public class SearchCondition {
             Boolean uploadFlg,
             Double radiusMeters
     ) {
+        this(
+                category,
+                subCategory,
+                fromTimestamp,
+                toTimestamp,
+                memoKeyword,
+                hasPhoto,
+                uploadFlg,
+                radiusMeters,
+                null
+        );
+    }
+
+    public SearchCondition(
+            String category,
+            String subCategory,
+            String fromTimestamp,
+            String toTimestamp,
+            String memoKeyword,
+            Boolean hasPhoto,
+            Boolean uploadFlg,
+            Double radiusMeters,
+            Integer resultLimit
+    ) {
         setCategory(category);
         setSubCategory(subCategory);
         setFromTimestamp(fromTimestamp);
@@ -32,6 +59,7 @@ public class SearchCondition {
         this.hasPhoto = hasPhoto;
         this.uploadFlg = uploadFlg;
         this.radiusMeters = radiusMeters;
+        this.resultLimit = normalizeLimit(resultLimit);
     }
 
     public boolean hasAnyCondition() {
@@ -43,6 +71,20 @@ public class SearchCondition {
                 || hasPhoto != null
                 || uploadFlg != null
                 || radiusMeters != null;
+    }
+
+    public static SearchCondition createDefault() {
+        return new SearchCondition(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                DEFAULT_RESULT_LIMIT
+        );
     }
 
     public String getCategory() {
@@ -109,6 +151,14 @@ public class SearchCondition {
         this.radiusMeters = radiusMeters;
     }
 
+    public Integer getResultLimit() {
+        return resultLimit;
+    }
+
+    public void setResultLimit(Integer resultLimit) {
+        this.resultLimit = normalizeLimit(resultLimit);
+    }
+
     private static String normalize(String value) {
         if (value == null) {
             return null;
@@ -116,5 +166,12 @@ public class SearchCondition {
 
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static Integer normalizeLimit(Integer value) {
+        if (value == null || value <= 0) {
+            return null;
+        }
+        return value;
     }
 }
