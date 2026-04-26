@@ -19,6 +19,9 @@ public interface LocationDao {
     @Query("SELECT * FROM locations ORDER BY timestamp ASC")
     List<LocationEntity> getAllLocations();
 
+    @Query("SELECT * FROM locations ORDER BY timestamp DESC")
+    List<LocationEntity> getAllLocationsLatestFirst();
+
     @Query("DELETE FROM locations WHERE id = :id")
     void deleteById(int id);
 

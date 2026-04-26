@@ -56,6 +56,12 @@ public class MenuService {
             }
         } else if (itemId == R.id.menu_item3) {
             SvConnectService.upload(context);
+        } else if (itemId == R.id.menu_item4) {
+            if (context instanceof MainActivity) {
+                DialogHelper.showSearchConditionDialog((MainActivity) context);
+            } else {
+                Toast.makeText(context, "Unknown context", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(context, "Unknown Option", Toast.LENGTH_SHORT).show();
         }

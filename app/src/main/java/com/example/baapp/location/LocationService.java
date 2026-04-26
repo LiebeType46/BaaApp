@@ -262,6 +262,10 @@ public class LocationService {
         return db.locationDao().getLatestLocations(limit);
     }
 
+    public List<LocationEntity> getAllLocationsLatestFirst() {
+        return db.locationDao().getAllLocationsLatestFirst();
+    }
+
     public LocationEntity getLocationById(int id) {
         return db.locationDao().findById(id);
     }
