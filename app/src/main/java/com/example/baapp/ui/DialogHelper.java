@@ -172,18 +172,16 @@ public class DialogHelper {
             @NonNull
             @Override
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView tv = (TextView) view;
+                TextView tv = getSpinnerTextView(context, convertView, parent, android.R.layout.simple_spinner_item);
                 tv.setText(resolveSearchCategoryLabel(context, getItem(position)));
-                return view;
+                return tv;
             }
 
             @Override
             public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                TextView tv = (TextView) view;
+                TextView tv = getSpinnerTextView(context, convertView, parent, android.R.layout.simple_spinner_dropdown_item);
                 tv.setText(resolveSearchCategoryLabel(context, getItem(position)));
-                return view;
+                return tv;
             }
         };
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -206,6 +204,19 @@ public class DialogHelper {
         }
 
         return CategoryLabelResolver.getLabel(context, category);
+    }
+
+    private static TextView getSpinnerTextView(
+            Context context,
+            View convertView,
+            ViewGroup parent,
+            int layoutResId
+    ) {
+        if (convertView instanceof TextView) {
+            return (TextView) convertView;
+        }
+
+        return (TextView) LayoutInflater.from(context).inflate(layoutResId, parent, false);
     }
 
     private static void setupResultLimitSpinner(Context context, Spinner spinner, Integer selectedLimit) {
