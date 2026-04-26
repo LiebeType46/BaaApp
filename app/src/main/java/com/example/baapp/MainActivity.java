@@ -29,18 +29,25 @@ import com.example.baapp.marker.MarkerManager;
 import com.example.baapp.photo.PhotoCaptureCallback;
 import com.example.baapp.photo.PhotoService;
 import com.example.baapp.photo.PhotoSession;
+import com.example.baapp.search.SearchCondition;
+import com.example.baapp.search.SearchConditionMapper;
 import com.example.baapp.ui.MenuService;
 import com.example.baapp.ui.TimelineAdapter;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.osmdroid.config.Configuration;
+import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
@@ -57,10 +64,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private List<LocationEntity> displayedMarkers = new ArrayList<>();
     private GeoPoint lastLocationPoint = null;
     public void refreshMarkers() {
-        GeoPoint lastLocation = locationService.getLastKnownLocation(this);
-        List<LocationEntity> recent =
-                locationService.getRecentLocationsSortedByDistance(this, lastLocation);
-        markerManager.initMarkers(recent);
+        reloadMapMarkers(null);
     }
     private BottomNavigationView bottomNavigation;
     private FloatingActionButton fabMenu;
@@ -72,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private RecyclerView timelineRecyclerView;
     private SwipeRefreshLayout swipeTimeline;
     private TimelineAdapter timelineAdapter;
+    private SearchCondition currentSearchCondition = new SearchCondition();
 
 
     @Override
@@ -109,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mapService = new MapService(mapView);
 
         db = AppDatabase.getInstance(getApplicationContext());
+        loadCurrentSearchCondition();
 
         // ユーザー情報確認
 
@@ -119,14 +125,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         GeoPoint lastLocation = locationService.getLastKnownLocation(this);
         if (lastLocation != null) {
-            mapView.post(() -> mapService.updateMapCenter(lastLocation, 15.0));
-
-            List<LocationEntity> tempLocations = locationService.getRecentLocationsSortedByDistance(this, lastLocation);
-
-            markerManager.initMarkers(tempLocations);
-
-            displayedMarkers = tempLocations;
             lastLocationPoint = lastLocation;
+            mapView.post(() -> {
+                mapService.updateMapCenter(lastLocation, 15.0);
+                reloadMapMarkers(lastLocation);
+            });
 
             Toast.makeText(this, R.string.use_last_location, Toast.LENGTH_LONG).show();
         }
@@ -137,8 +140,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 markerManager.updateCurrentLocation(this, location, this.getString(R.string.current_location));
                 // 🔥 中心移動を遅延実行
                 if (!isFinishing() && !isDestroyed()) {
-                    markerManager.removeMarkers(displayedMarkers);
-
                     if (lastLocationPoint != null) {
                         GeoPoint center = (GeoPoint) mapView.getMapCenter();
                         if (MapUtils.isNearCenter(center, lastLocationPoint, 50)) {
@@ -146,12 +147,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                         }
                     }
                     lastLocationPoint = location;
-
-                    List<LocationEntity> recentLocations = locationService.getRecentLocationsSortedByDistance(this, location);
-
-                    markerManager.initMarkers(recentLocations);
-
-                    displayedMarkers = recentLocations;
+                    reloadMapMarkers(location);
 
                     Toast.makeText(this, R.string.get_current_location, Toast.LENGTH_SHORT).show();
                 }
@@ -310,8 +306,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             // CSVインポート完了メッセージの後
             GeoPoint lastLocation = locationService.getLastKnownLocation(this);
-            List<LocationEntity> recent = locationService.getRecentLocationsSortedByDistance(this, lastLocation);
-            markerManager.initMarkers(recent);
+            reloadMapMarkers(lastLocation);
         }
     }
 
@@ -369,8 +364,232 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Toast.makeText(this, "アカウント画面は未実装", Toast.LENGTH_SHORT).show();
     }
 
+    public SearchCondition getCurrentSearchCondition() {
+        if (currentSearchCondition == null) {
+            currentSearchCondition = new SearchCondition();
+        }
+        return currentSearchCondition;
+    }
+
+    public void applySearchCondition(SearchCondition condition) {
+        currentSearchCondition = condition != null ? condition : new SearchCondition();
+
+        if (currentSearchCondition.hasAnyCondition()) {
+            db.searchConditionDao().save(SearchConditionMapper.toEntity(currentSearchCondition));
+        } else {
+            db.searchConditionDao().clearCurrent();
+        }
+
+        reloadBySearchCondition();
+    }
+
+    private void loadCurrentSearchCondition() {
+        currentSearchCondition = SearchConditionMapper.toDto(db.searchConditionDao().getCurrent());
+    }
+
+    private void reloadBySearchCondition() {
+        reloadMapMarkers(null);
+        if (timelineAdapter != null) {
+            loadTimelinePosts();
+        }
+    }
+
+    private void reloadMapMarkers(GeoPoint fallbackCenter) {
+        if (locationService == null || markerManager == null) {
+            return;
+        }
+
+        GeoPoint searchCenter = getMapSearchCenter(fallbackCenter);
+        GeoPoint sortReference = searchCenter != null ? searchCenter : lastLocationPoint;
+        List<LocationEntity> sourceLocations = getCurrentSearchCondition().hasAnyCondition()
+                ? locationService.getAllLocationsLatestFirst()
+                : locationService.getRecentLocationsSortedByDistance(this, sortReference);
+        List<LocationEntity> filteredLocations =
+                filterLocationsBySearchCondition(sourceLocations, true, searchCenter);
+
+        markerManager.removeMarkers(displayedMarkers);
+        markerManager.initMarkers(filteredLocations);
+        displayedMarkers = filteredLocations;
+    }
+
+    private GeoPoint getMapSearchCenter(GeoPoint fallbackCenter) {
+        if (mapView != null) {
+            IGeoPoint center = mapView.getMapCenter();
+            if (center != null) {
+                return new GeoPoint(center.getLatitude(), center.getLongitude());
+            }
+        }
+
+        return fallbackCenter != null ? fallbackCenter : lastLocationPoint;
+    }
+
     private void loadTimelinePosts() {
-        List<LocationEntity> latestPosts = locationService.getLatestLocations(100);
-        timelineAdapter.setItems(latestPosts);
+        List<LocationEntity> sourcePosts = hasTimelineSearchCondition()
+                ? locationService.getAllLocationsLatestFirst()
+                : locationService.getLatestLocations(100);
+        List<LocationEntity> filteredPosts =
+                filterLocationsBySearchCondition(sourcePosts, false, null);
+
+        if (filteredPosts.size() > 100) {
+            filteredPosts = new ArrayList<>(filteredPosts.subList(0, 100));
+        }
+
+        timelineAdapter.setItems(filteredPosts);
+    }
+
+    private boolean hasTimelineSearchCondition() {
+        SearchCondition condition = getCurrentSearchCondition();
+        return condition.getCategory() != null
+                || condition.getSubCategory() != null
+                || condition.getFromTimestamp() != null
+                || condition.getToTimestamp() != null
+                || condition.getMemoKeyword() != null
+                || condition.getHasPhoto() != null
+                || condition.getUploadFlg() != null;
+    }
+
+    private List<LocationEntity> filterLocationsBySearchCondition(
+            List<LocationEntity> locations,
+            boolean includeRadius,
+            GeoPoint radiusCenter
+    ) {
+        List<LocationEntity> filtered = new ArrayList<>();
+        SearchCondition condition = getCurrentSearchCondition();
+        Date fromDate = parseTimestamp(condition.getFromTimestamp());
+        Date toDate = parseTimestamp(condition.getToTimestamp());
+
+        if (locations == null) {
+            return filtered;
+        }
+
+        for (LocationEntity entity : locations) {
+            if (matchesSearchCondition(entity, condition, fromDate, toDate, includeRadius, radiusCenter)) {
+                filtered.add(entity);
+            }
+        }
+
+        return filtered;
+    }
+
+    private boolean matchesSearchCondition(
+            LocationEntity entity,
+            SearchCondition condition,
+            Date fromDate,
+            Date toDate,
+            boolean includeRadius,
+            GeoPoint radiusCenter
+    ) {
+        if (entity == null) {
+            return false;
+        }
+
+        if (condition.getCategory() != null && !condition.getCategory().equals(entity.getCategory())) {
+            return false;
+        }
+
+        if (condition.getSubCategory() != null
+                && !containsText(entity.getSubCategory(), condition.getSubCategory())) {
+            return false;
+        }
+
+        if (fromDate != null || toDate != null) {
+            Date entityDate = parseTimestamp(entity.getTimestamp());
+            if (entityDate == null) {
+                return false;
+            }
+            if (fromDate != null && entityDate.before(fromDate)) {
+                return false;
+            }
+            if (toDate != null && entityDate.after(toDate)) {
+                return false;
+            }
+        }
+
+        if (condition.getMemoKeyword() != null
+                && !containsText(entity.getMemo(), condition.getMemoKeyword())) {
+            return false;
+        }
+
+        if (Boolean.TRUE.equals(condition.getHasPhoto()) && !hasPhoto(entity)) {
+            return false;
+        }
+
+        if (condition.getUploadFlg() != null
+                && condition.getUploadFlg() != entity.isUploadFlg()) {
+            return false;
+        }
+
+        if (includeRadius && condition.getRadiusMeters() != null && radiusCenter != null) {
+            double distance = distanceBetween(radiusCenter, entity);
+            if (distance > condition.getRadiusMeters()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean containsText(String value, String keyword) {
+        String normalizedValue = normalizeSearchText(value);
+        String normalizedKeyword = normalizeSearchText(keyword);
+
+        if (normalizedKeyword == null) {
+            return true;
+        }
+        if (normalizedValue == null) {
+            return false;
+        }
+
+        return normalizedValue.toLowerCase(Locale.ROOT)
+                .contains(normalizedKeyword.toLowerCase(Locale.ROOT));
+    }
+
+    private boolean hasPhoto(LocationEntity entity) {
+        String photoUri = normalizeSearchText(entity.getPhotoUri());
+        return photoUri != null;
+    }
+
+    private Date parseTimestamp(String value) {
+        String normalized = normalizeSearchText(value);
+        if (normalized == null) {
+            return null;
+        }
+
+        String[] patterns = {
+                "yyyy/MM/dd HH:mm:ss",
+                "yyyy-MM-dd HH:mm:ss"
+        };
+
+        for (String pattern : patterns) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat(pattern, Locale.getDefault());
+                format.setLenient(false);
+                return format.parse(normalized);
+            } catch (ParseException ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    private double distanceBetween(GeoPoint point, LocationEntity entity) {
+        float[] results = new float[1];
+        Location.distanceBetween(
+                point.getLatitude(),
+                point.getLongitude(),
+                entity.getLatitude(),
+                entity.getLongitude(),
+                results
+        );
+        return results[0];
+    }
+
+    private String normalizeSearchText(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.baapp.common.MainCategoryConverter;
 
-@Database(entities = {LocationEntity.class}, version = 7, exportSchema = false)
+@Database(entities = {LocationEntity.class, SearchConditionEntity.class}, version = 8, exportSchema = false)
 @TypeConverters({MainCategoryConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -37,6 +37,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             .addMigrations(MIGRATION_4_5)
                             .addMigrations(MIGRATION_5_6)
                             .addMigrations(MIGRATION_6_7)
+                            .addMigrations(MIGRATION_7_8)
                             .build();
                     Log.d("AppDatabase", "AppDatabase initialized");
                 }
@@ -74,6 +75,8 @@ public abstract class AppDatabase extends RoomDatabase {
 
 
     public abstract LocationDao locationDao();
+
+    public abstract SearchConditionDao searchConditionDao();
 
     static final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
@@ -149,6 +152,26 @@ public abstract class AppDatabase extends RoomDatabase {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase db) {
             db.execSQL("ALTER TABLE locations ADD COLUMN uploadFlg INTEGER  NOT NULL DEFAULT 0");
+        }
+    };
+
+    static final Migration MIGRATION_7_8 = new Migration(7, 8) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS search_condition (" +
+                            "id TEXT NOT NULL, " +
+                            "category TEXT, " +
+                            "subCategory TEXT, " +
+                            "fromTimestamp TEXT, " +
+                            "toTimestamp TEXT, " +
+                            "memoKeyword TEXT, " +
+                            "hasPhoto INTEGER, " +
+                            "uploadFlg INTEGER, " +
+                            "radiusMeters REAL, " +
+                            "PRIMARY KEY(id)" +
+                            ")"
+            );
         }
     };
 
