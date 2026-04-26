@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private TimelineAdapter timelineAdapter;
     private SearchCondition currentSearchCondition = new SearchCondition();
     private SearchCondition defaultSearchCondition = SearchCondition.createDefault();
+    private boolean focusingLocationFromIntent = false;
 
 
     @Override
@@ -126,12 +127,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         // LocationService 初期化
         locationService = LocationService.getInstance(this);
+        focusingLocationFromIntent = hasFocusLocationIntent(getIntent());
 
         GeoPoint lastLocation = locationService.getLastKnownLocation(this);
         if (lastLocation != null) {
             lastLocationPoint = lastLocation;
             mapView.post(() -> {
-                mapService.updateMapCenter(lastLocation, 15.0);
+                if (!focusingLocationFromIntent) {
+                    mapService.updateMapCenter(lastLocation, 15.0);
+                }
                 reloadMapMarkers(lastLocation);
             });
 
@@ -144,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 markerManager.updateCurrentLocation(this, location, this.getString(R.string.current_location));
                 // 🔥 中心移動を遅延実行
                 if (!isFinishing() && !isDestroyed()) {
-                    if (lastLocationPoint != null) {
+                    if (!focusingLocationFromIntent && lastLocationPoint != null) {
                         GeoPoint center = (GeoPoint) mapView.getMapCenter();
                         if (MapUtils.isNearCenter(center, lastLocationPoint, 50)) {
                             mapView.getController().setCenter(location);
@@ -170,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     : locationService.getLastKnownLocation(this);
 
             if (point != null) {
+                focusingLocationFromIntent = false;
                 mapView.getController().setCenter(point);
                 Toast.makeText(this, R.string.center_on_current_location, Toast.LENGTH_SHORT).show();
             } else {
@@ -206,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         });
 
         showMapMode();
-        handleFocusLocationIntent(getIntent());
+        mapView.post(() -> handleFocusLocationIntent(getIntent()));
     }
 
 
@@ -235,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             if (point != null) {
                 markerManager.updateCurrentLocation(this, point, this.getString(R.string.current_location));
 
-                if (lastLocationPoint != null) {
+                if (!focusingLocationFromIntent && lastLocationPoint != null) {
                     GeoPoint center = (GeoPoint) mapView.getMapCenter();
                     if (MapUtils.isNearCenter(center, lastLocationPoint, 50)) {
                         mapView.getController().setCenter(point);
@@ -321,7 +326,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        handleFocusLocationIntent(intent);
+        focusingLocationFromIntent = hasFocusLocationIntent(intent);
+        mapView.post(() -> handleFocusLocationIntent(intent));
     }
 
     public MarkerManager getMarkerManager() {
@@ -359,8 +365,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         showMapMode();
         mapService.focusOnLocation(entity, markerManager);
+        bottomNavigation.setSelectedItemId(R.id.navigation_map);
 
         intent.removeExtra(EXTRA_FOCUS_LOCATION_ID);
+    }
+
+    private boolean hasFocusLocationIntent(Intent intent) {
+        return intent != null && intent.getIntExtra(EXTRA_FOCUS_LOCATION_ID, -1) != -1;
     }
 
     public void showAccountOptions() {

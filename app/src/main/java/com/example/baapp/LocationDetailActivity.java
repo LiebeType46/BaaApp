@@ -77,6 +77,7 @@ public class LocationDetailActivity extends AppCompatActivity {
 
         tvOpenMap.setOnClickListener(v -> {
             Intent intent = new Intent(LocationDetailActivity.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra(MainActivity.EXTRA_FOCUS_LOCATION_ID, item.getId());
             startActivity(intent);
         });
