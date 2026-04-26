@@ -1,5 +1,9 @@
 package com.example.baapp.search;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class SearchCondition {
 
     public static final int DEFAULT_RESULT_LIMIT = 50;
@@ -96,7 +100,42 @@ public class SearchCondition {
     }
 
     public void setCategory(String category) {
-        this.category = normalize(category);
+        this.category = normalizeCategoryList(category);
+    }
+
+    public List<String> getCategories() {
+        List<String> categories = new ArrayList<>();
+        if (category == null) {
+            return categories;
+        }
+
+        for (String value : category.split(",")) {
+            String normalized = normalize(value);
+            if (normalized != null) {
+                categories.add(normalized);
+            }
+        }
+
+        return categories;
+    }
+
+    public void setCategories(List<String> categories) {
+        if (categories == null || categories.isEmpty()) {
+            this.category = null;
+            return;
+        }
+
+        List<String> normalizedCategories = new ArrayList<>();
+        for (String value : categories) {
+            String normalized = normalize(value);
+            if (normalized != null) {
+                normalizedCategories.add(normalized);
+            }
+        }
+
+        this.category = normalizedCategories.isEmpty()
+                ? null
+                : String.join(",", normalizedCategories);
     }
 
     public String getSubCategory() {
@@ -170,6 +209,24 @@ public class SearchCondition {
 
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static String normalizeCategoryList(String value) {
+        String normalized = normalize(value);
+        if (normalized == null) {
+            return null;
+        }
+
+        List<String> values = Arrays.asList(normalized.split(","));
+        List<String> normalizedValues = new ArrayList<>();
+        for (String category : values) {
+            String normalizedCategory = normalize(category);
+            if (normalizedCategory != null) {
+                normalizedValues.add(normalizedCategory);
+            }
+        }
+
+        return normalizedValues.isEmpty() ? null : String.join(",", normalizedValues);
     }
 
     private static Integer normalizeLimit(Integer value) {

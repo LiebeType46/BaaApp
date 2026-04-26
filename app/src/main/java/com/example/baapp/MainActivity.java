@@ -515,7 +515,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             return false;
         }
 
-        if (condition.getCategory() != null && !condition.getCategory().equals(entity.getCategory())) {
+        if (!condition.getCategories().isEmpty()
+                && !condition.getCategories().contains(entity.getCategory())) {
             return false;
         }
 

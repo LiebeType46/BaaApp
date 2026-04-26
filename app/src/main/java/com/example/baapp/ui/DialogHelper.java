@@ -37,11 +37,13 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 public class DialogHelper {
 
@@ -73,7 +75,7 @@ public class DialogHelper {
         builder.setView(dialogView);
         builder.setTitle(language.t("dialog.search_condition.title"));
 
-        Spinner categorySpinner = dialogView.findViewById(R.id.spSearchCategory);
+        TextView categoryValue = dialogView.findViewById(R.id.tvSearchCategoryValue);
         Spinner resultLimitSpinner = dialogView.findViewById(R.id.spSearchResultLimit);
         EditText subCategoryField = dialogView.findViewById(R.id.etSearchSubCategory);
         TextView fromText = dialogView.findViewById(R.id.tvSearchFrom);
@@ -85,7 +87,8 @@ public class DialogHelper {
 
         SearchCondition currentCondition = activity.getCurrentSearchCondition();
         applySearchConditionLabels(language, dialogView);
-        setupSearchCategorySpinner(activity, categorySpinner, currentCondition.getCategory());
+        List<MainCategory> selectedCategories = getSelectedMainCategories(currentCondition.getCategories());
+        setSearchCategoryValueText(activity, categoryValue, selectedCategories);
         setupResultLimitSpinner(activity, resultLimitSpinner, currentCondition.getResultLimit());
         setTextIfPresent(subCategoryField, currentCondition.getSubCategory());
         setTextIfPresent(fromText, currentCondition.getFromTimestamp());
@@ -99,7 +102,15 @@ public class DialogHelper {
 
         fromText.setOnClickListener(v -> showSearchDateTimePicker(activity, fromText));
         toText.setOnClickListener(v -> showSearchDateTimePicker(activity, toText));
+        categoryValue.setOnClickListener(v ->
+                showSearchCategoryPicker(activity, categoryValue, selectedCategories)
+        );
 
+        dialogView.findViewById(R.id.tvClearSearchCategory)
+                .setOnClickListener(v -> {
+                    selectedCategories.clear();
+                    setSearchCategoryValueText(activity, categoryValue, selectedCategories);
+                });
         dialogView.findViewById(R.id.tvClearSearchSubCategory)
                 .setOnClickListener(v -> subCategoryField.setText(""));
         dialogView.findViewById(R.id.tvClearSearchFrom)
@@ -120,7 +131,7 @@ public class DialogHelper {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
                 SearchCondition condition = buildSearchCondition(
                         activity,
-                        categorySpinner,
+                        selectedCategories,
                         resultLimitSpinner,
                         subCategoryField,
                         fromText,
@@ -141,7 +152,9 @@ public class DialogHelper {
 
             dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
                 clearSearchConditionInputs(
-                        categorySpinner,
+                        selectedCategories,
+                        categoryValue,
+                        activity,
                         resultLimitSpinner,
                         subCategoryField,
                         fromText,
@@ -157,66 +170,71 @@ public class DialogHelper {
         dialog.show();
     }
 
-    private static void setupSearchCategorySpinner(Context context, Spinner spinner, String selectedCategory) {
-        List<MainCategory> categories = new ArrayList<>();
-        categories.add(null);
+    private static List<MainCategory> getSelectedMainCategories(List<String> selectedCategoryIds) {
+        Set<String> selectedIds = new HashSet<>(selectedCategoryIds);
+        List<MainCategory> selectedCategories = new ArrayList<>();
         for (MainCategory category : MainCategory.values()) {
-            categories.add(category);
-        }
-
-        ArrayAdapter<MainCategory> adapter = new ArrayAdapter<MainCategory>(
-                context,
-                android.R.layout.simple_spinner_item,
-                categories
-        ) {
-            @NonNull
-            @Override
-            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                TextView tv = getSpinnerTextView(context, convertView, parent, android.R.layout.simple_spinner_item);
-                tv.setText(resolveSearchCategoryLabel(context, getItem(position)));
-                return tv;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
-                TextView tv = getSpinnerTextView(context, convertView, parent, android.R.layout.simple_spinner_dropdown_item);
-                tv.setText(resolveSearchCategoryLabel(context, getItem(position)));
-                return tv;
-            }
-        };
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
-        if (selectedCategory != null) {
-            for (int i = 0; i < categories.size(); i++) {
-                MainCategory category = categories.get(i);
-                if (category != null && selectedCategory.equals(category.getId())) {
-                    spinner.setSelection(i);
-                    return;
-                }
+            if (selectedIds.contains(category.getId())) {
+                selectedCategories.add(category);
             }
         }
+
+        return selectedCategories;
     }
 
-    private static String resolveSearchCategoryLabel(Context context, MainCategory category) {
-        if (category == null) {
-            return LanguageService.get(context).t("dialog.search_condition.unspecified");
-        }
-
-        return CategoryLabelResolver.getLabel(context, category);
-    }
-
-    private static TextView getSpinnerTextView(
+    private static void showSearchCategoryPicker(
             Context context,
-            View convertView,
-            ViewGroup parent,
-            int layoutResId
+            TextView categoryValue,
+            List<MainCategory> selectedCategories
     ) {
-        if (convertView instanceof TextView) {
-            return (TextView) convertView;
+        MainCategory[] categories = MainCategory.values();
+        String[] labels = new String[categories.length];
+        boolean[] checkedItems = new boolean[categories.length];
+        List<MainCategory> pendingSelection = new ArrayList<>(selectedCategories);
+
+        for (int i = 0; i < categories.length; i++) {
+            labels[i] = CategoryLabelResolver.getLabel(context, categories[i]);
+            checkedItems[i] = pendingSelection.contains(categories[i]);
         }
 
-        return (TextView) LayoutInflater.from(context).inflate(layoutResId, parent, false);
+        new AlertDialog.Builder(context)
+                .setTitle(LanguageService.get(context).t("dialog.search_condition.category"))
+                .setMultiChoiceItems(labels, checkedItems, (dialog, which, isChecked) -> {
+                    MainCategory category = categories[which];
+                    if (isChecked && !pendingSelection.contains(category)) {
+                        pendingSelection.add(category);
+                    } else if (!isChecked) {
+                        pendingSelection.remove(category);
+                    }
+                })
+                .setPositiveButton(LanguageService.get(context).t("common.apply"), (dialog, which) -> {
+                    selectedCategories.clear();
+                    selectedCategories.addAll(pendingSelection);
+                    setSearchCategoryValueText(context, categoryValue, selectedCategories);
+                })
+                .setNeutralButton(LanguageService.get(context).t("common.clear"), (dialog, which) -> {
+                    selectedCategories.clear();
+                    setSearchCategoryValueText(context, categoryValue, selectedCategories);
+                })
+                .setNegativeButton(LanguageService.get(context).t("common.cancel"), null)
+                .show();
+    }
+
+    private static void setSearchCategoryValueText(
+            Context context,
+            TextView categoryValue,
+            List<MainCategory> selectedCategories
+    ) {
+        if (selectedCategories.isEmpty()) {
+            categoryValue.setText("");
+            return;
+        }
+
+        List<String> labels = new ArrayList<>();
+        for (MainCategory category : selectedCategories) {
+            labels.add(CategoryLabelResolver.getLabel(context, category));
+        }
+        categoryValue.setText(String.join(", ", labels));
     }
 
     private static void setupResultLimitSpinner(Context context, Spinner spinner, Integer selectedLimit) {
@@ -242,7 +260,7 @@ public class DialogHelper {
 
     private static SearchCondition buildSearchCondition(
             Context context,
-            Spinner categorySpinner,
+            List<MainCategory> selectedCategories,
             Spinner resultLimitSpinner,
             EditText subCategoryField,
             TextView fromText,
@@ -275,12 +293,14 @@ public class DialogHelper {
             }
         }
 
-        MainCategory selectedCategoryItem = (MainCategory) categorySpinner.getSelectedItem();
-        String selectedCategory = selectedCategoryItem != null ? selectedCategoryItem.getId() : null;
+        List<String> selectedCategoryIds = new ArrayList<>();
+        for (MainCategory category : selectedCategories) {
+            selectedCategoryIds.add(category.getId());
+        }
         Integer resultLimit = (Integer) resultLimitSpinner.getSelectedItem();
 
-        return new SearchCondition(
-                selectedCategory,
+        SearchCondition condition = new SearchCondition(
+                null,
                 subCategoryField.getText().toString(),
                 fromText.getText().toString(),
                 toText.getText().toString(),
@@ -290,6 +310,8 @@ public class DialogHelper {
                 radiusMeters,
                 resultLimit
         );
+        condition.setCategories(selectedCategoryIds);
+        return condition;
     }
 
     private static void showSearchDateTimePicker(Context context, TextView target) {
@@ -347,6 +369,8 @@ public class DialogHelper {
 
     private static void applySearchConditionLabels(LanguageService language, View dialogView) {
         language.setText(dialogView, R.id.tvSearchCategoryLabel, "dialog.search_condition.category");
+        language.setText(dialogView, R.id.tvClearSearchCategory, "common.clear");
+        language.setHint(dialogView, R.id.tvSearchCategoryValue, "dialog.search_condition.unspecified");
         language.setText(dialogView, R.id.tvSearchResultLimitLabel, "dialog.search_condition.result_limit");
         language.setText(dialogView, R.id.tvSearchSubCategoryLabel, "dialog.search_condition.sub_category");
         language.setText(dialogView, R.id.tvClearSearchSubCategory, "common.clear");
@@ -377,7 +401,9 @@ public class DialogHelper {
     }
 
     private static void clearSearchConditionInputs(
-            Spinner categorySpinner,
+            List<MainCategory> selectedCategories,
+            TextView categoryValue,
+            Context context,
             Spinner resultLimitSpinner,
             EditText subCategoryField,
             TextView fromText,
@@ -387,7 +413,8 @@ public class DialogHelper {
             CheckBox hasPhotoCheck,
             CheckBox unsentOnlyCheck
     ) {
-        categorySpinner.setSelection(0);
+        selectedCategories.clear();
+        setSearchCategoryValueText(context, categoryValue, selectedCategories);
         resultLimitSpinner.setSelection(getDefaultResultLimitPosition());
         subCategoryField.setText("");
         fromText.setText("");
