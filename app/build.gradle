@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'org.baanet.baaapp'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "org.baanet.baaapp"
@@ -41,7 +41,6 @@ dependencies {
     implementation libs.okhttp
     implementation libs.gson
     implementation libs.swiperefreshlayout
-    implementation libs.material.v1110
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
