@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 import org.baanet.baaapp.R;
+import org.baanet.baaapp.common.CategoryLabelResolver;
+import org.baanet.baaapp.common.MainCategoryConverter;
 import org.baanet.baaapp.data.LocationEntity;
 
 import org.osmdroid.events.MapEventsReceiver;
@@ -41,7 +43,7 @@ public class MarkerManager {
         Marker marker = new Marker(mapView);
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         marker.setPosition(new GeoPoint(entity.getLatitude(), entity.getLongitude()));
-        marker.setTitle(entity.getCategory() + entity.getMemo());
+        marker.setTitle(buildMarkerTitle(entity));
 
         marker.setRelatedObject(entity);
 
@@ -137,7 +139,7 @@ public class MarkerManager {
         focusedLocationMarker = new Marker(mapView);
         focusedLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         focusedLocationMarker.setPosition(new GeoPoint(entity.getLatitude(), entity.getLongitude()));
-        focusedLocationMarker.setTitle(entity.getCategory() + entity.getMemo());
+        focusedLocationMarker.setTitle(buildMarkerTitle(entity));
         focusedLocationMarker.setRelatedObject(entity);
 
         focusedLocationMarker.setInfoWindow(new BasicInfoWindow(
@@ -163,5 +165,14 @@ public class MarkerManager {
             focusedLocationMarker = null;
             mapView.invalidate();
         }
+    }
+
+    private String buildMarkerTitle(LocationEntity entity) {
+        String categoryLabel = CategoryLabelResolver.getLabel(
+                mapView.getContext(),
+                MainCategoryConverter.toCategory(entity.getCategory())
+        );
+        String memo = entity.getMemo() != null ? entity.getMemo() : "";
+        return categoryLabel + memo;
     }
 }

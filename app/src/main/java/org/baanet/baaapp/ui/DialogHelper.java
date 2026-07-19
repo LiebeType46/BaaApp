@@ -552,6 +552,7 @@ public class DialogHelper {
                 (MainCategory) categorySpinner.getSelectedItem();
         String category =
                 selected != null ? selected.getId() : MainCategory.DAILY.getId();
+        String categoryLabel = CategoryLabelResolver.getLabel(context, selected);
         String subCategory = subCategoryField.getText().toString();
         String timestamp = timestampField.getText().toString();
         String memo = memoField.getText().toString();
@@ -565,7 +566,7 @@ public class DialogHelper {
             locationService.saveLocation(category, subCategory, latitude, longitude, timestamp, memo, uploadFlg, uriStr);
             Toast.makeText(
                     context,
-                    LanguageService.get(context).t("register.complete") + category,
+                    LanguageService.get(context).t("register.complete") + categoryLabel,
                     Toast.LENGTH_SHORT
             ).show();
 

@@ -26,12 +26,22 @@ public enum MainCategory {
     }
 
     public static MainCategory fromId(String id) {
+        MainCategory category = fromIdOrNull(id);
+        return category != null ? category : DAILY;
+    }
+
+    public static MainCategory fromIdOrNull(String id) {
+        if (id == null) {
+            return null;
+        }
+
+        String normalizedId = id.trim();
         for (MainCategory category : values()) {
-            if (category.getId().equals(id)) {
+            if (category.getId().equalsIgnoreCase(normalizedId)) {
                 return category;
             }
         }
-        return DAILY;
+        return null;
     }
 
     public static MainCategory fromLabel(int label) {

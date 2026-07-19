@@ -5,6 +5,9 @@ import android.util.Log;
 
 import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
+import org.baanet.baaapp.common.CategoryLabelResolver;
+import org.baanet.baaapp.common.MainCategory;
+import org.baanet.baaapp.common.MainCategoryConverter;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -25,7 +28,7 @@ public class CsvImporter {
     public void importFromCsv(Context context, Uri fileUri) {
         try {
             List<String> lines = readCsvLines(context, fileUri);
-            List<LocationEntity> data = parseCsvLines(lines);
+            List<LocationEntity> data = parseCsvLines(context, lines);
             saveToDatabase(data);
         } catch (Exception e) {
             Log.e("CsvImporter", "インポート失敗: " + e.getMessage(), e);
@@ -42,7 +45,7 @@ public class CsvImporter {
         }
     }
 
-    private List<LocationEntity> parseCsvLines(List<String> lines) {
+    private List<LocationEntity> parseCsvLines(Context context, List<String> lines) {
         List<LocationEntity> result = new ArrayList<>();
         boolean hasHeader = true;
 
@@ -50,12 +53,12 @@ public class CsvImporter {
             String first = lines.get(0).trim();
             if (isDataLine(first)) {
                 hasHeader = false;
-                result.add(toEntity(first));
+                result.add(toEntity(context, first));
             }
         }
 
         for (int i = hasHeader ? 1 : 0; i < lines.size(); i++) {
-            LocationEntity entity = toEntity(lines.get(i));
+            LocationEntity entity = toEntity(context, lines.get(i));
             if (entity != null) result.add(entity);
         }
         return result;
@@ -64,27 +67,28 @@ public class CsvImporter {
     private boolean isDataLine(String line) {
         String[] cols = smartCsvSplit(line);
         try {
-            Double.parseDouble(cols[0]);
-            Double.parseDouble(cols[1]);
+            int offset = hasIdColumn(cols) ? 1 : 0;
+            Double.parseDouble(cols[offset + 2].trim());
+            Double.parseDouble(cols[offset + 3].trim());
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    private LocationEntity toEntity(String line) {
+    private LocationEntity toEntity(Context context, String line) {
         String[] cols = smartCsvSplit(line);
-        if (cols.length != 8) return null;
+        if (cols.length < 7) return null;
         try {
-            // 各値に trim() を追加
-            String category = cols[0].trim();
-            String subCategory = cols[1].trim();
-            double lat = Double.parseDouble(cols[2].trim());
-            double lon = Double.parseDouble(cols[3].trim());
-            String timestamp = cols[4].trim();
-            String memo = cols[5].trim();
+            int offset = hasIdColumn(cols) ? 1 : 0;
+            String category = normalizeCategory(context, cols[offset].trim());
+            String subCategory = cols[offset + 1].trim();
+            double lat = Double.parseDouble(cols[offset + 2].trim());
+            double lon = Double.parseDouble(cols[offset + 3].trim());
+            String timestamp = cols[offset + 4].trim();
+            String memo = cols[offset + 5].trim();
             boolean uploadFlg = true;
-            String photoPath = cols[6].trim();
+            String photoPath = cols.length > offset + 6 ? cols[offset + 6].trim() : "";
             return new LocationEntity(category, subCategory, lat, lon, timestamp, memo, uploadFlg, photoPath);
         } catch (Exception e) {
             Log.w("CsvImporter", "変換失敗: " + line);
@@ -100,5 +104,30 @@ public class CsvImporter {
 
     private String[] smartCsvSplit(String line) {
         return csvSplitPattern.split(line);
+    }
+
+    private boolean hasIdColumn(String[] cols) {
+        if (cols.length < 8) {
+            return false;
+        }
+
+        try {
+            Integer.parseInt(cols[0].trim());
+            Double.parseDouble(cols[3].trim());
+            Double.parseDouble(cols[4].trim());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String normalizeCategory(Context context, String value) {
+        MainCategory category = CategoryLabelResolver.fromLabel(context, value);
+        if (category != null) {
+            return category.getId();
+        }
+
+        String categoryId = MainCategoryConverter.normalizeCategoryId(value);
+        return categoryId != null ? categoryId : MainCategory.DAILY.getId();
     }
 }

@@ -26,22 +26,40 @@ public class CategoryLabelResolver {
 
     public static String getLabel(Context context, MainCategory category) {
         LanguageService language = LanguageService.get(context);
+        return language.t(getLabelKey(category));
+    }
+
+    public static MainCategory fromLabel(Context context, String label) {
+        if (label == null) {
+            return null;
+        }
+
+        String normalizedLabel = label.trim();
+        for (MainCategory category : MainCategory.values()) {
+            if (getLabel(context, category).equals(normalizedLabel)) {
+                return category;
+            }
+        }
+        return null;
+    }
+
+    private static String getLabelKey(MainCategory category) {
         if (category == null) {
-            return language.t("category.daily");
+            return "category.daily";
         }
 
         switch (category) {
             case EMERGENCY:
-                return language.t("category.emergency");
+                return "category.emergency";
             case WARNING:
-                return language.t("category.warning");
+                return "category.warning";
             case INFO:
-                return language.t("category.info");
+                return "category.info";
             case SUPPORT:
-                return language.t("category.support");
+                return "category.support";
             case DAILY:
             default:
-                return language.t("category.daily");
+                return "category.daily";
         }
     }
 }

@@ -3,6 +3,8 @@ package org.baanet.baaapp.data;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import org.baanet.baaapp.common.MainCategoryConverter;
+
 @Entity(tableName = "locations")
 public class LocationEntity {
 
@@ -19,7 +21,7 @@ public class LocationEntity {
 
 
     public LocationEntity(String category, String subCategory, double latitude, double longitude, String timestamp, String memo, boolean uploadFlg, String photoUri) {
-        this.category = category;
+        setCategory(category);
         this.subCategory = subCategory;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -43,7 +45,7 @@ public class LocationEntity {
     }
 
     public void setCategory(String category) {
-        this.category = category;
+        this.category = MainCategoryConverter.normalizeCategoryIdOrDefault(category);
     }
 
     public String getSubCategory() {

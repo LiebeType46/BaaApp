@@ -1,5 +1,7 @@
 package org.baanet.baaapp.search;
 
+import org.baanet.baaapp.common.MainCategoryConverter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -220,7 +222,7 @@ public class SearchCondition {
         List<String> values = Arrays.asList(normalized.split(","));
         List<String> normalizedValues = new ArrayList<>();
         for (String category : values) {
-            String normalizedCategory = normalize(category);
+            String normalizedCategory = MainCategoryConverter.normalizeCategoryId(category);
             if (normalizedCategory != null) {
                 normalizedValues.add(normalizedCategory);
             }

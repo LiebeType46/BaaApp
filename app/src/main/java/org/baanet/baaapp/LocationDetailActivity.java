@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.baanet.baaapp.common.CategoryLabelResolver;
+import org.baanet.baaapp.common.MainCategoryConverter;
 import org.baanet.baaapp.data.LocationEntity;
 import org.baanet.baaapp.common.LanguageService;
 import org.baanet.baaapp.location.LocationService;
@@ -54,7 +56,12 @@ public class LocationDetailActivity extends AppCompatActivity {
             return;
         }
 
-        tvCategorySubCategory.setText(item.getCategory() + " / " + item.getSubCategory());
+        String categoryLabel = CategoryLabelResolver.getLabel(
+                this,
+                MainCategoryConverter.toCategory(item.getCategory())
+        );
+        String subCategory = item.getSubCategory() != null ? item.getSubCategory() : "";
+        tvCategorySubCategory.setText(categoryLabel + " / " + subCategory);
         tvLocationTimestamp.setText(String.format(
                 Locale.getDefault(),
                 "%.6f, %.6f / %s",

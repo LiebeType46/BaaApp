@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import org.baanet.baaapp.common.MainCategoryConverter;
 
-@Database(entities = {LocationEntity.class, SearchConditionEntity.class}, version = 9, exportSchema = false)
+@Database(entities = {LocationEntity.class, SearchConditionEntity.class}, version = 10, exportSchema = false)
 @TypeConverters({MainCategoryConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -39,6 +39,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             .addMigrations(MIGRATION_6_7)
                             .addMigrations(MIGRATION_7_8)
                             .addMigrations(MIGRATION_8_9)
+                            .addMigrations(MIGRATION_9_10)
                             .build();
                     Log.d("AppDatabase", "AppDatabase initialized");
                 }
@@ -184,6 +185,32 @@ public abstract class AppDatabase extends RoomDatabase {
                     "INSERT OR IGNORE INTO search_condition " +
                             "(id, category, subCategory, fromTimestamp, toTimestamp, memoKeyword, hasPhoto, uploadFlg, radiusMeters, resultLimit) " +
                             "VALUES ('default', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 50)"
+            );
+        }
+    };
+
+    static final Migration MIGRATION_9_10 = new Migration(9, 10) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL(
+                    "UPDATE locations SET category = CASE " +
+                            "WHEN category = 'EMERGENCY' OR category = '緊急' THEN 'EMERGENCY' " +
+                            "WHEN category = 'WARNING' OR category = '警告' THEN 'WARNING' " +
+                            "WHEN category = 'INFO' OR category = '情報' THEN 'INFO' " +
+                            "WHEN category = 'SUPPORT' OR category = '支援' THEN 'SUPPORT' " +
+                            "WHEN category = 'DAILY' OR category = '日常' THEN 'DAILY' " +
+                            "ELSE 'DAILY' END"
+            );
+
+            db.execSQL(
+                    "UPDATE search_condition SET category = " +
+                            "replace(replace(replace(replace(replace(category, " +
+                            "'緊急', 'EMERGENCY'), " +
+                            "'警告', 'WARNING'), " +
+                            "'情報', 'INFO'), " +
+                            "'支援', 'SUPPORT'), " +
+                            "'日常', 'DAILY') " +
+                            "WHERE category IS NOT NULL"
             );
         }
     };
