@@ -9,34 +9,34 @@
         android:id="@+id/info_category"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="カテゴリ"
+        android:text=""
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/info_subcategory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="サブカテゴリ"
+        android:text=""
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/info_latlon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="緯度経度"
+        android:text=""
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/info_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="時刻" />
+        android:text="" />
 
     <TextView
         android:id="@+id/info_memo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="メモ" />
+        android:text="" />
 
     <ImageView
         android:id="@+id/info_image"
@@ -51,7 +51,7 @@
         android:id="@+id/tvOpenDetail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="この投稿の詳細"
+        android:text=""
         android:textColor="#1E88E5"
         android:paddingTop="8dp" />
 </LinearLayout>

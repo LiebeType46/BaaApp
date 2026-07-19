@@ -21,7 +21,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingBottom="4dp"
-                android:text="カテゴリ"
+                android:text=""
                 android:textSize="16sp" />
 
             <TextView
@@ -31,7 +31,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="4dp"
-                android:text="クリア"
+                android:text=""
                 android:textColor="@android:color/holo_blue_dark" />
         </LinearLayout>
 
@@ -43,7 +43,7 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center_vertical"
-            android:hint="未指定"
+            android:hint=""
             android:minHeight="48dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp" />
@@ -54,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:paddingBottom="4dp"
-            android:text="件数"
+            android:text=""
             android:textSize="16sp" />
 
         <Spinner
@@ -75,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingBottom="4dp"
-                android:text="サブカテゴリ"
+                android:text=""
                 android:textSize="16sp" />
 
             <TextView
@@ -85,7 +85,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="4dp"
-                android:text="クリア"
+                android:text=""
                 android:textColor="@android:color/holo_blue_dark" />
         </LinearLayout>
 
@@ -93,7 +93,7 @@
             android:id="@+id/etSearchSubCategory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="サブカテゴリ"
+            android:hint=""
             android:inputType="text" />
 
         <LinearLayout
@@ -109,7 +109,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingBottom="4dp"
-                android:text="開始日時"
+                android:text=""
                 android:textSize="16sp" />
 
             <TextView
@@ -119,7 +119,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="4dp"
-                android:text="クリア"
+                android:text=""
                 android:textColor="@android:color/holo_blue_dark" />
         </LinearLayout>
 
@@ -131,7 +131,7 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center_vertical"
-            android:hint="未指定"
+            android:hint=""
             android:minHeight="48dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp" />
@@ -149,7 +149,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingBottom="4dp"
-                android:text="終了日時"
+                android:text=""
                 android:textSize="16sp" />
 
             <TextView
@@ -159,7 +159,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="4dp"
-                android:text="クリア"
+                android:text=""
                 android:textColor="@android:color/holo_blue_dark" />
         </LinearLayout>
 
@@ -171,7 +171,7 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center_vertical"
-            android:hint="未指定"
+            android:hint=""
             android:minHeight="48dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp" />
@@ -189,7 +189,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingBottom="4dp"
-                android:text="メモキーワード"
+                android:text=""
                 android:textSize="16sp" />
 
             <TextView
@@ -199,7 +199,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="4dp"
-                android:text="クリア"
+                android:text=""
                 android:textColor="@android:color/holo_blue_dark" />
         </LinearLayout>
 
@@ -207,7 +207,7 @@
             android:id="@+id/etSearchKeyword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="キーワード"
+            android:hint=""
             android:inputType="text" />
 
         <LinearLayout
@@ -223,7 +223,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingBottom="4dp"
-                android:text="半径（m）"
+                android:text=""
                 android:textSize="16sp" />
 
             <TextView
@@ -233,7 +233,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="4dp"
-                android:text="クリア"
+                android:text=""
                 android:textColor="@android:color/holo_blue_dark" />
         </LinearLayout>
 
@@ -241,7 +241,7 @@
             android:id="@+id/etSearchRadius"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="未指定"
+            android:hint=""
             android:inputType="numberDecimal" />
 
         <CheckBox
@@ -249,13 +249,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="写真ありのみ" />
+            android:text="" />
 
         <CheckBox
             android:id="@+id/cbUnsentOnly"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="未送信のみ" />
+            android:text="" />
 
     </LinearLayout>
 </ScrollView>

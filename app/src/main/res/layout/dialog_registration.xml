@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="4dp"
-        android:text="カテゴリ"
+        android:text=""
         android:textSize="16sp" />
 
     <Spinner
@@ -22,48 +22,48 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="4dp"
-        android:text="サブカテゴリ（自由記述）"
+        android:text=""
         android:textSize="16sp" />
 
     <EditText
         android:id="@+id/subCategoryEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="例：倒木、不審者など" />
+        android:hint="" />
 
     <EditText
         android:id="@+id/latitudeField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="true"
-        android:hint="緯度" />
+        android:hint="" />
 
     <EditText
         android:id="@+id/longitudeField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="true"
-        android:hint="経度" />
+        android:hint="" />
 
     <EditText
         android:id="@+id/timestampField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="true"
-        android:hint="時刻" />
+        android:hint="" />
 
     <EditText
         android:id="@+id/memoField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="メモを入力"
+        android:hint=""
         android:inputType="text" />
 
     <Button
         android:id="@+id/btnAddPhoto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="写真を追加" />
+        android:text="" />
 
     <ImageView
         android:id="@+id/photoPreview"

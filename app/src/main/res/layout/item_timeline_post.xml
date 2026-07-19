@@ -23,14 +23,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="カテゴリ / サブカテゴリ" />
+            android:text="" />
 
         <TextView
             android:id="@+id/tvLocationTimestamp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="緯度, 経度 / 時刻"
+            android:text=""
             android:textSize="12sp" />
 
         <TextView
@@ -38,7 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="メモ"
+            android:text=""
             android:maxLines="10" />
 
     </LinearLayout>

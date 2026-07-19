@@ -4,16 +4,16 @@
     <item
         android:id="@+id/navigation_map"
         android:icon="@drawable/ic_map"
-        android:title="地図" />
+        android:title="" />
 
     <item
         android:id="@+id/navigation_timeline"
         android:icon="@drawable/ic_timeline"
-        android:title="タイムライン" />
+        android:title="" />
 
     <item
         android:id="@+id/navigation_settings"
         android:icon="@drawable/ic_settings"
-        android:title="設定" />
+        android:title="" />
 
 </menu>
