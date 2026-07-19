@@ -1,14 +1,20 @@
 package org.baanet.baaapp;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +61,9 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
     public static final String EXTRA_FOCUS_LOCATION_ID = "focus_location_id";
+    private static final String PREF = "baa_prefs";
+    private static final String KEY_TOKEN = "token";
+    private static final String KEY_PUBLIC_ID = "public_id";
 
     private MapView mapView;
     private MarkerManager markerManager;
@@ -384,57 +393,183 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         TextView general = findViewById(R.id.tvGeneralSettings);
         TextView account = findViewById(R.id.tvAccountSettings);
         TextView dataManagement = findViewById(R.id.tvDataManagement);
-        TextView csvImport = findViewById(R.id.tvCsvImportSettings);
+        TextView generalBack = findViewById(R.id.tvGeneralSettingsBack);
+        TextView generalTitle = findViewById(R.id.tvGeneralSettingsTitle);
+        TextView languageSettings = findViewById(R.id.tvLanguageSettings);
+        Spinner languageSpinner = findViewById(R.id.spLanguageSettings);
+        TextView mapTileCacheClear = findViewById(R.id.tvMapTileCacheClear);
+        Button mapTileCacheClearButton = findViewById(R.id.btnMapTileCacheClear);
+        TextView appInfo = findViewById(R.id.tvAppInfo);
+        TextView accountBack = findViewById(R.id.tvAccountSettingsBack);
+        TextView accountTitle = findViewById(R.id.tvAccountSettingsTitle);
+        TextView userInfo = findViewById(R.id.tvUserInfo);
+        TextView userInfoEdit = findViewById(R.id.tvUserInfoEdit);
+        TextView userInfoDetails = findViewById(R.id.tvUserInfoDetails);
+        TextView logout = findViewById(R.id.tvLogout);
         TextView dataManagementBack = findViewById(R.id.tvDataManagementBack);
         TextView dataManagementTitle = findViewById(R.id.tvDataManagementTitle);
+        TextView csvIo = findViewById(R.id.tvCsvIoSettings);
         TextView serverConnection = findViewById(R.id.tvServerConnectionSettings);
-        TextView serverUpload = findViewById(R.id.tvServerUploadSettings);
-        TextView dataBackup = findViewById(R.id.tvDataBackupSettings);
-        TextView dataRestore = findViewById(R.id.tvDataRestoreSettings);
 
         title.setText(language.t("settings.title"));
         general.setText(language.t("settings.general"));
         account.setText(language.t("settings.account"));
         dataManagement.setText(language.t("settings.data_management"));
-        csvImport.setText(language.t("settings.csv_import"));
+        generalBack.setText(language.t("settings.back"));
+        generalTitle.setText(language.t("settings.general"));
+        languageSettings.setText(language.t("settings.language"));
+        mapTileCacheClear.setText(language.t("settings.map_tile_cache_clear"));
+        mapTileCacheClearButton.setText(language.t("common.clear"));
+        appInfo.setText(language.t("settings.app_info"));
+        accountBack.setText(language.t("settings.back"));
+        accountTitle.setText(language.t("settings.account"));
+        userInfo.setText(language.t("settings.user_info"));
+        userInfoEdit.setText(language.t("settings.edit"));
+        userInfoDetails.setText(buildUserInfoText());
+        logout.setText(language.t("settings.logout"));
         dataManagementBack.setText(language.t("settings.back"));
         dataManagementTitle.setText(language.t("settings.data_management"));
-        serverConnection.setText(language.t("settings.server_connection"));
-        serverUpload.setText(language.t("settings.server_upload"));
-        dataBackup.setText(language.t("settings.data_backup"));
-        dataRestore.setText(language.t("settings.data_restore"));
+        csvIo.setText(language.t("settings.csv_io"));
+        serverConnection.setText(language.t("settings.server_communication"));
 
-        findViewById(R.id.rowGeneralSettings).setOnClickListener(v ->
-                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+        ArrayAdapter<String> languageAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                new String[]{language.t("settings.language_japanese")}
         );
-        findViewById(R.id.rowAccountSettings).setOnClickListener(v ->
-                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
-        );
+        languageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        languageSpinner.setAdapter(languageAdapter);
+
+        findViewById(R.id.rowGeneralSettings).setOnClickListener(v -> showGeneralSettings());
+        findViewById(R.id.rowAccountSettings).setOnClickListener(v -> {
+            userInfoDetails.setText(buildUserInfoText());
+            showAccountSettings();
+        });
         findViewById(R.id.rowDataManagement).setOnClickListener(v -> showDataManagementSettings());
+        generalBack.setOnClickListener(v -> showSettingsTop());
+        accountBack.setOnClickListener(v -> showSettingsTop());
         dataManagementBack.setOnClickListener(v -> showSettingsTop());
-        serverConnection.setOnClickListener(v ->
+        mapTileCacheClearButton.setOnClickListener(v -> showConfirmDialog(
+                language.t("settings.map_tile_cache_clear"),
+                language.t("settings.confirm_clear_tile_cache")
+        ));
+        appInfo.setOnClickListener(v -> showAppInfoDialog());
+        userInfoEdit.setOnClickListener(v ->
                 Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
         );
-        serverUpload.setOnClickListener(v ->
-                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
-        );
-        dataBackup.setOnClickListener(v ->
-                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
-        );
-        dataRestore.setOnClickListener(v ->
-                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
-        );
-        csvImport.setOnClickListener(v -> MenuService.startCsvImport(this));
+        logout.setOnClickListener(v -> showConfirmDialog(
+                language.t("settings.logout"),
+                language.t("settings.confirm_logout")
+        ));
+        csvIo.setOnClickListener(v -> showCsvIoDialog());
+        serverConnection.setOnClickListener(v -> showServerCommunicationDialog());
     }
 
     private void showSettingsTop() {
         findViewById(R.id.settingsTopContainer).setVisibility(View.VISIBLE);
+        findViewById(R.id.generalSettingsContainer).setVisibility(View.GONE);
+        findViewById(R.id.accountSettingsContainer).setVisibility(View.GONE);
+        findViewById(R.id.dataManagementContainer).setVisibility(View.GONE);
+    }
+
+    private void showGeneralSettings() {
+        findViewById(R.id.settingsTopContainer).setVisibility(View.GONE);
+        findViewById(R.id.generalSettingsContainer).setVisibility(View.VISIBLE);
+        findViewById(R.id.accountSettingsContainer).setVisibility(View.GONE);
+        findViewById(R.id.dataManagementContainer).setVisibility(View.GONE);
+    }
+
+    private void showAccountSettings() {
+        findViewById(R.id.settingsTopContainer).setVisibility(View.GONE);
+        findViewById(R.id.generalSettingsContainer).setVisibility(View.GONE);
+        findViewById(R.id.accountSettingsContainer).setVisibility(View.VISIBLE);
         findViewById(R.id.dataManagementContainer).setVisibility(View.GONE);
     }
 
     private void showDataManagementSettings() {
         findViewById(R.id.settingsTopContainer).setVisibility(View.GONE);
+        findViewById(R.id.generalSettingsContainer).setVisibility(View.GONE);
+        findViewById(R.id.accountSettingsContainer).setVisibility(View.GONE);
         findViewById(R.id.dataManagementContainer).setVisibility(View.VISIBLE);
+    }
+
+    private void showConfirmDialog(String title, String message) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(language.t("settings.ok"), (dialog, which) ->
+                        Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+                )
+                .setNegativeButton(language.t("common.cancel"), null)
+                .show();
+    }
+
+    private void showAppInfoDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(language.t("settings.app_info"))
+                .setMessage(buildAppInfoText())
+                .setPositiveButton(language.t("settings.ok"), null)
+                .show();
+    }
+
+    private void showCsvIoDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(language.t("settings.csv_io_title"))
+                .setPositiveButton(language.t("settings.csv_import"), (dialog, which) ->
+                        MenuService.startCsvImport(this)
+                )
+                .setNegativeButton(language.t("settings.csv_export"), (dialog, which) ->
+                        Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+                )
+                .setNeutralButton(language.t("common.cancel"), null)
+                .show();
+    }
+
+    private void showServerCommunicationDialog() {
+        Spinner communicationSpinner = new Spinner(this);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                new String[]{
+                        language.t("settings.communication_manual"),
+                        language.t("settings.communication_auto")
+                }
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        communicationSpinner.setAdapter(adapter);
+
+        new AlertDialog.Builder(this)
+                .setTitle(language.t("settings.server_communication_title"))
+                .setView(communicationSpinner)
+                .setPositiveButton(language.t("settings.sync_execute"), (dialog, which) ->
+                        Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+                )
+                .setNegativeButton(language.t("common.cancel"), null)
+                .show();
+    }
+
+    private String buildUserInfoText() {
+        SharedPreferences prefs = getSharedPreferences(PREF, MODE_PRIVATE);
+        String publicId = prefs.getString(KEY_PUBLIC_ID, language.t("settings.not_set"));
+        String token = prefs.getString(KEY_TOKEN, null);
+        String tokenStatus = token == null || token.isBlank()
+                ? language.t("settings.not_set")
+                : language.t("login.ok");
+
+        return language.t("settings.user_public_id") + ": " + publicId
+                + "\n" + language.t("settings.user_token") + ": " + tokenStatus;
+    }
+
+    private String buildAppInfoText() {
+        String versionName = "";
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versionName = packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+
+        return language.t("settings.app_version") + ": " + versionName
+                + "\n" + language.t("settings.app_package") + ": " + getPackageName();
     }
 
     public SearchCondition getCurrentSearchCondition() {
