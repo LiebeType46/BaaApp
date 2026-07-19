@@ -74,13 +74,13 @@ public class LocationDetailActivity extends AppCompatActivity {
         String photoUriStr = item.getPhotoUri();
 
         if (photoUriStr != null && !photoUriStr.isEmpty()) {
-            Uri photoUri = Uri.parse(photoUriStr);
+            Uri photoUri = PhotoService.getInstance(this).resolvePhotoUri(photoUriStr);
 
             ivPhoto.setVisibility(View.VISIBLE);
             ivPhoto.setImageURI(photoUri);
 
             ivPhoto.setOnClickListener(v ->
-                    PhotoService.showFullSizePhoto(LocationDetailActivity.this, photoUri.toString())
+                    PhotoService.showFullSizePhoto(LocationDetailActivity.this, photoUriStr)
             );
         } else {
             ivPhoto.setVisibility(View.GONE);

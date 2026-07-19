@@ -27,6 +27,8 @@ import java.util.Date;
 
 public class PhotoService {
 
+    public static final String PHOTO_DIR = "photos";
+
     private static PhotoService instance;
     private final Context context;
     private OnPhotoSelectedListener callback;
@@ -98,7 +100,7 @@ public class PhotoService {
 
         // 保存先ファイル生成
         String fileName = "IMG_" + System.currentTimeMillis() + ".jpg";
-        File photoFile = new File(context.getFilesDir(), "photos");
+        File photoFile = new File(context.getFilesDir(), PHOTO_DIR);
         if (!photoFile.exists()){
             photoFile.mkdirs();
         }
@@ -111,6 +113,45 @@ public class PhotoService {
         out.close();
 
         return output;
+    }
+
+    public String toStoredPhotoPath(File imageFile) {
+        if (imageFile == null) {
+            return "";
+        }
+        return PHOTO_DIR + "/" + imageFile.getName();
+    }
+
+    public Uri resolvePhotoUri(String storedPhotoPath) {
+        String normalizedPath = normalizeStoredPhotoPath(storedPhotoPath);
+        if (normalizedPath == null) {
+            return null;
+        }
+
+        File file = new File(context.getFilesDir(), normalizedPath);
+        return Uri.fromFile(file);
+    }
+
+    public static String normalizeStoredPhotoPath(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        int photoDirIndex = trimmed.lastIndexOf(PHOTO_DIR + "/");
+        if (photoDirIndex >= 0) {
+            return trimmed.substring(photoDirIndex);
+        }
+
+        if (trimmed.startsWith(PHOTO_DIR + "/")) {
+            return trimmed;
+        }
+
+        return trimmed;
     }
 
     private Bitmap resizeBitmap(Bitmap source, int maxLength) {
@@ -153,7 +194,7 @@ public class PhotoService {
         dialog.setContentView(R.layout.dialog_full_photo);
 
         ImageView imageView = dialog.findViewById(R.id.full_image);
-        imageView.setImageURI(Uri.parse(uriStr));
+        imageView.setImageURI(PhotoService.getInstance(context).resolvePhotoUri(uriStr));
 
         dialog.show();
     }

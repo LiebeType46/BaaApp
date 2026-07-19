@@ -557,13 +557,13 @@ public class DialogHelper {
         String timestamp = timestampField.getText().toString();
         String memo = memoField.getText().toString();
         boolean uploadFlg = false;
-        String uriStr = photoUri != null ? photoUri.toString() : "";
+        String storedPhotoPath = photoFile != null ? photoService.toStoredPhotoPath(photoFile) : "";
 
         try {
             double latitude = Double.parseDouble(latitudeField.getText().toString());
             double longitude = Double.parseDouble(longitudeField.getText().toString());
 
-            locationService.saveLocation(category, subCategory, latitude, longitude, timestamp, memo, uploadFlg, uriStr);
+            locationService.saveLocation(category, subCategory, latitude, longitude, timestamp, memo, uploadFlg, storedPhotoPath);
             Toast.makeText(
                     context,
                     LanguageService.get(context).t("register.complete") + categoryLabel,
@@ -601,7 +601,7 @@ public class DialogHelper {
                                         File file = photoService.copyAndResizePhotoFromUri(uri);
                                         if (file != null) {
                                             photoFile = file;
-                                            photoUri = Uri.fromFile(file);
+                                            photoUri = photoService.resolvePhotoUri(photoService.toStoredPhotoPath(file));
 
                                             Bitmap thumbnail = photoService.generateThumbnail(file);
                                             photoPreview.setVisibility(View.VISIBLE);
@@ -626,7 +626,7 @@ public class DialogHelper {
                                     File file = photoService.copyAndResizePhotoFromUri(uri);
                                     if (file != null) {
                                         photoFile = file;
-                                        photoUri = Uri.fromFile(file);
+                                        photoUri = photoService.resolvePhotoUri(photoService.toStoredPhotoPath(file));
 
                                         Bitmap thumbnail = photoService.generateThumbnail(file);
                                         photoPreview.setVisibility(View.VISIBLE);

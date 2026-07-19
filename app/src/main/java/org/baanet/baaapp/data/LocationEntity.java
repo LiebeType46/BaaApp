@@ -4,6 +4,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import org.baanet.baaapp.common.MainCategoryConverter;
+import org.baanet.baaapp.photo.PhotoService;
 
 @Entity(tableName = "locations")
 public class LocationEntity {
@@ -28,7 +29,7 @@ public class LocationEntity {
         this.timestamp = timestamp;
         this.memo = memo;
         this.uploadFlg = uploadFlg;
-        this.photoUri = photoUri;
+        setPhotoUri(photoUri);
     }
 
     // Getter / Setter
@@ -104,7 +105,7 @@ public class LocationEntity {
     }
 
     public void setPhotoUri(String photoUri) {
-        this.photoUri = photoUri;
+        this.photoUri = PhotoService.normalizeStoredPhotoPath(photoUri);
     }
 
 }

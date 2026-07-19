@@ -1,7 +1,6 @@
 package org.baanet.baaapp.marker;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,6 +11,7 @@ import org.baanet.baaapp.common.CategoryLabelResolver;
 import org.baanet.baaapp.common.LanguageService;
 import org.baanet.baaapp.common.MainCategoryConverter;
 import org.baanet.baaapp.data.LocationEntity;
+import org.baanet.baaapp.photo.PhotoService;
 
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
@@ -53,7 +53,9 @@ public class BasicInfoWindow extends InfoWindow {
 
             if (entity.getPhotoUri() != null && !entity.getPhotoUri().isEmpty()) {
                 imageView.setVisibility(View.VISIBLE);
-                imageView.setImageURI(Uri.parse(entity.getPhotoUri()));
+                imageView.setImageURI(
+                        PhotoService.getInstance(mView.getContext()).resolvePhotoUri(entity.getPhotoUri())
+                );
                 imageView.setOnClickListener(v -> {
                     if (listener != null) {
                         listener.onClick(entity.getPhotoUri());

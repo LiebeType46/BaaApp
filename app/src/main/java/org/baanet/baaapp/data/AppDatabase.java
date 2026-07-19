@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import org.baanet.baaapp.common.MainCategoryConverter;
 
-@Database(entities = {LocationEntity.class, SearchConditionEntity.class}, version = 10, exportSchema = false)
+@Database(entities = {LocationEntity.class, SearchConditionEntity.class}, version = 11, exportSchema = false)
 @TypeConverters({MainCategoryConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -40,6 +40,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             .addMigrations(MIGRATION_7_8)
                             .addMigrations(MIGRATION_8_9)
                             .addMigrations(MIGRATION_9_10)
+                            .addMigrations(MIGRATION_10_11)
                             .build();
                     Log.d("AppDatabase", "AppDatabase initialized");
                 }
@@ -211,6 +212,19 @@ public abstract class AppDatabase extends RoomDatabase {
                             "'支援', 'SUPPORT'), " +
                             "'日常', 'DAILY') " +
                             "WHERE category IS NOT NULL"
+            );
+        }
+    };
+
+    static final Migration MIGRATION_10_11 = new Migration(10, 11) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL(
+                    "UPDATE locations SET photoUri = " +
+                            "substr(photoUri, instr(photoUri, 'photos/')) " +
+                            "WHERE photoUri IS NOT NULL " +
+                            "AND photoUri != '' " +
+                            "AND instr(photoUri, 'photos/') > 0"
             );
         }
     };
