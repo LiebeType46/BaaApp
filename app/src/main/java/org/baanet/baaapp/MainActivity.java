@@ -376,6 +376,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mapModeContainer.setVisibility(View.GONE);
         timelineModeContainer.setVisibility(View.GONE);
         settingsModeContainer.setVisibility(View.VISIBLE);
+        showSettingsTop();
     }
 
     private void setupSettingsMode() {
@@ -384,12 +385,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         TextView account = findViewById(R.id.tvAccountSettings);
         TextView dataManagement = findViewById(R.id.tvDataManagement);
         TextView csvImport = findViewById(R.id.tvCsvImportSettings);
+        TextView dataManagementBack = findViewById(R.id.tvDataManagementBack);
+        TextView dataManagementTitle = findViewById(R.id.tvDataManagementTitle);
+        TextView serverConnection = findViewById(R.id.tvServerConnectionSettings);
+        TextView serverUpload = findViewById(R.id.tvServerUploadSettings);
+        TextView dataBackup = findViewById(R.id.tvDataBackupSettings);
+        TextView dataRestore = findViewById(R.id.tvDataRestoreSettings);
 
         title.setText(language.t("settings.title"));
         general.setText(language.t("settings.general"));
         account.setText(language.t("settings.account"));
         dataManagement.setText(language.t("settings.data_management"));
         csvImport.setText(language.t("settings.csv_import"));
+        dataManagementBack.setText(language.t("settings.back"));
+        dataManagementTitle.setText(language.t("settings.data_management"));
+        serverConnection.setText(language.t("settings.server_connection"));
+        serverUpload.setText(language.t("settings.server_upload"));
+        dataBackup.setText(language.t("settings.data_backup"));
+        dataRestore.setText(language.t("settings.data_restore"));
 
         findViewById(R.id.rowGeneralSettings).setOnClickListener(v ->
                 Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
@@ -397,10 +410,31 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         findViewById(R.id.rowAccountSettings).setOnClickListener(v ->
                 Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
         );
-        findViewById(R.id.rowDataManagement).setOnClickListener(v ->
+        findViewById(R.id.rowDataManagement).setOnClickListener(v -> showDataManagementSettings());
+        dataManagementBack.setOnClickListener(v -> showSettingsTop());
+        serverConnection.setOnClickListener(v ->
+                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+        );
+        serverUpload.setOnClickListener(v ->
+                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+        );
+        dataBackup.setOnClickListener(v ->
+                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+        );
+        dataRestore.setOnClickListener(v ->
                 Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
         );
         csvImport.setOnClickListener(v -> MenuService.startCsvImport(this));
+    }
+
+    private void showSettingsTop() {
+        findViewById(R.id.settingsTopContainer).setVisibility(View.VISIBLE);
+        findViewById(R.id.dataManagementContainer).setVisibility(View.GONE);
+    }
+
+    private void showDataManagementSettings() {
+        findViewById(R.id.settingsTopContainer).setVisibility(View.GONE);
+        findViewById(R.id.dataManagementContainer).setVisibility(View.VISIBLE);
     }
 
     public SearchCondition getCurrentSearchCondition() {

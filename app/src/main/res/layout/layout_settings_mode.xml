@@ -14,84 +14,148 @@
         android:textStyle="bold" />
 
     <LinearLayout
-        android:id="@+id/rowGeneralSettings"
+        android:id="@+id/settingsTopContainer"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_settings" />
-
-        <TextView
-            android:id="@+id/tvGeneralSettings"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:layout_weight="1"
+        <LinearLayout
+            android:id="@+id/rowGeneralSettings"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
             android:gravity="center_vertical"
-            android:text="全般設定"
-            android:textSize="18sp" />
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_settings" />
+
+            <TextView
+                android:id="@+id/tvGeneralSettings"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="全般設定"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rowAccountSettings"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_account" />
+
+            <TextView
+                android:id="@+id/tvAccountSettings"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="アカウント設定"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rowDataManagement"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_database" />
+
+            <TextView
+                android:id="@+id/tvDataManagement"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="データ管理"
+                android:textSize="18sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/rowAccountSettings"
+        android:id="@+id/dataManagementContainer"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_account" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <TextView
-            android:id="@+id/tvAccountSettings"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:layout_weight="1"
+            android:id="@+id/tvDataManagementBack"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
             android:gravity="center_vertical"
-            android:text="アカウント設定"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/rowDataManagement"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_database" />
+            android:text="設定に戻る"
+            android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/tvDataManagement"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
+            android:id="@+id/tvDataManagementTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:text="データ管理"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvServerConnectionSettings"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:text="サーバー通信設定"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tvServerUploadSettings"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:text="サーバーアップロード"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tvDataBackupSettings"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:text="データバックアップ"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tvDataRestoreSettings"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:text="データ復元"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tvCsvImportSettings"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:text="CSVインポート"
             android:textSize="18sp" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvCsvImportSettings"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginStart="40dp"
-        android:gravity="center_vertical"
-        android:text="CSVインポート"
-        android:textSize="18sp" />
 
 </LinearLayout>
