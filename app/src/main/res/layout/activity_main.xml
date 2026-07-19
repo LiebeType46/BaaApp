@@ -23,10 +23,9 @@
             layout="@layout/layout_timeline_mode"
             android:visibility="gone" />
 
-        <FrameLayout
-            android:id="@+id/accountModeContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <include
+            android:id="@+id/settingsModeContainer"
+            layout="@layout/layout_settings_mode"
             android:visibility="gone" />
 
     </FrameLayout>

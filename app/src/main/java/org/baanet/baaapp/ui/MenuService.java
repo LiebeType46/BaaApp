@@ -44,21 +44,6 @@ public class MenuService {
             } else {
                 Toast.makeText(context, LanguageService.get(context).t("common.unknown_context"), Toast.LENGTH_SHORT).show();
             }
-        } else if (itemId == R.id.menu_item2) {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("*/*");
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-            if (context instanceof android.app.Activity) {
-                ((android.app.Activity) context).startActivityForResult(
-                        Intent.createChooser(
-                                intent,
-                                LanguageService.get(context).t("csv.select_file")
-                        ), REQUEST_CODE_IMPORT_CSV
-                );
-            } else {
-                Toast.makeText(context, LanguageService.get(context).t("csv.warn_import"), Toast.LENGTH_SHORT).show();
-            }
         } else if (itemId == R.id.menu_item3) {
             SvConnectService.upload(context);
         } else if (itemId == R.id.menu_item4) {
@@ -69,6 +54,23 @@ public class MenuService {
             }
         } else {
             Toast.makeText(context, LanguageService.get(context).t("common.unknown_option"), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static void startCsvImport(Context context) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        if (context instanceof android.app.Activity) {
+            ((android.app.Activity) context).startActivityForResult(
+                    Intent.createChooser(
+                            intent,
+                            LanguageService.get(context).t("csv.select_file")
+                    ), REQUEST_CODE_IMPORT_CSV
+            );
+        } else {
+            Toast.makeText(context, LanguageService.get(context).t("csv.warn_import"), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -85,8 +87,8 @@ public class MenuService {
             } else if (itemId == R.id.navigation_timeline) {
                 activity.showTimelineMode();
                 return true;
-            } else if (itemId == R.id.navigation_account) {
-                activity.showAccountOptions();
+            } else if (itemId == R.id.navigation_settings) {
+                activity.showSettingsMode();
                 return true;
             }
 
@@ -97,7 +99,6 @@ public class MenuService {
     private static void applyPopupMenuLanguage(Context context, PopupMenu popupMenu) {
         LanguageService language = LanguageService.get(context);
         language.setMenuTitle(popupMenu.getMenu(), R.id.menu_item1, "menu.register_location");
-        language.setMenuTitle(popupMenu.getMenu(), R.id.menu_item2, "menu.csv_import");
         language.setMenuTitle(popupMenu.getMenu(), R.id.menu_item3, "menu.option3");
         language.setMenuTitle(popupMenu.getMenu(), R.id.menu_item4, "menu.search_condition");
     }
@@ -106,6 +107,6 @@ public class MenuService {
         LanguageService language = LanguageService.get(context);
         language.setMenuTitle(bottomNavigation.getMenu(), R.id.navigation_map, "bottom.map");
         language.setMenuTitle(bottomNavigation.getMenu(), R.id.navigation_timeline, "bottom.timeline");
-        language.setMenuTitle(bottomNavigation.getMenu(), R.id.navigation_account, "bottom.account");
+        language.setMenuTitle(bottomNavigation.getMenu(), R.id.navigation_settings, "bottom.settings");
     }
 }

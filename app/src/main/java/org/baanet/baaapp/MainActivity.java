@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private ImageButton btnCenterOnCurrentLocation;
     private View mapModeContainer;
     private View timelineModeContainer;
-    private View accountModeContainer;
+    private View settingsModeContainer;
     private FloatingActionButton fabTimelineSearch;
     private FloatingActionButton fabPost;
     private RecyclerView timelineRecyclerView;
@@ -96,7 +97,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         mapModeContainer = findViewById(R.id.mapModeContainer);
         timelineModeContainer = findViewById(R.id.timelineModeContainer);
-        accountModeContainer = findViewById(R.id.accountModeContainer);
+        settingsModeContainer = findViewById(R.id.settingsModeContainer);
+        setupSettingsMode();
 
         fabMenu = findViewById(R.id.fabMenu);
         btnCenterOnCurrentLocation = findViewById(R.id.btnCenterOnCurrentLocation);
@@ -338,13 +340,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void showMapMode() {
         mapModeContainer.setVisibility(View.VISIBLE);
         timelineModeContainer.setVisibility(View.GONE);
-        accountModeContainer.setVisibility(View.GONE);
+        settingsModeContainer.setVisibility(View.GONE);
     }
 
     public void showTimelineMode() {
         mapModeContainer.setVisibility(View.GONE);
         timelineModeContainer.setVisibility(View.VISIBLE);
-        accountModeContainer.setVisibility(View.GONE);
+        settingsModeContainer.setVisibility(View.GONE);
 
         loadTimelinePosts();
     }
@@ -370,12 +372,35 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         intent.removeExtra(EXTRA_FOCUS_LOCATION_ID);
     }
 
-    public void showAccountOptions() {
+    public void showSettingsMode() {
         mapModeContainer.setVisibility(View.GONE);
         timelineModeContainer.setVisibility(View.GONE);
-        accountModeContainer.setVisibility(View.VISIBLE);
+        settingsModeContainer.setVisibility(View.VISIBLE);
+    }
 
-        Toast.makeText(this, language.t("main.account_unimplemented"), Toast.LENGTH_SHORT).show();
+    private void setupSettingsMode() {
+        TextView title = findViewById(R.id.tvSettingsTitle);
+        TextView general = findViewById(R.id.tvGeneralSettings);
+        TextView account = findViewById(R.id.tvAccountSettings);
+        TextView dataManagement = findViewById(R.id.tvDataManagement);
+        TextView csvImport = findViewById(R.id.tvCsvImportSettings);
+
+        title.setText(language.t("settings.title"));
+        general.setText(language.t("settings.general"));
+        account.setText(language.t("settings.account"));
+        dataManagement.setText(language.t("settings.data_management"));
+        csvImport.setText(language.t("settings.csv_import"));
+
+        findViewById(R.id.rowGeneralSettings).setOnClickListener(v ->
+                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+        );
+        findViewById(R.id.rowAccountSettings).setOnClickListener(v ->
+                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+        );
+        findViewById(R.id.rowDataManagement).setOnClickListener(v ->
+                Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+        );
+        csvImport.setOnClickListener(v -> MenuService.startCsvImport(this));
     }
 
     public SearchCondition getCurrentSearchCondition() {
