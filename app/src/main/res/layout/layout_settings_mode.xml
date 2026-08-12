@@ -233,6 +233,14 @@
                 android:textSize="16sp" />
 
             <TextView
+                android:id="@+id/tvChangePassword"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:gravity="center_vertical"
+                android:text=""
+                android:textSize="18sp" />
+
+            <TextView
                 android:id="@+id/tvLogout"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"

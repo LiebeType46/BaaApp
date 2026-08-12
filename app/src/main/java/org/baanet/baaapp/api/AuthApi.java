@@ -57,6 +57,55 @@ public class AuthApi {
         call.enqueue(callback);
     }
 
+    public static void changePassword(
+            Context context,
+            String token,
+            String currentPassword,
+            String newPassword,
+            AuthResultCallback callback
+    ) {
+        LanguageService language = LanguageService.get(context);
+        try {
+            JSONObject body = new JSONObject();
+            body.put("currentPassword", currentPassword);
+            body.put("newPassword", newPassword);
+
+            Request req = ApiRequest.authPost(ApiEndpoint.CHANGE_PASSWORD, token, body.toString());
+
+            client.newCall(req).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    callback.onError(language.format("password_change.network_error", e.getMessage()));
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String resBody = response.body() != null ? response.body().string() : "";
+
+                    if (!response.isSuccessful()) {
+                        callback.onError(language.format("password_change.failed", response.code()));
+                        return;
+                    }
+
+                    try {
+                        AuthResponse resObj = gson.fromJson(resBody, AuthResponse.class);
+
+                        if (resObj == null || resObj.token == null || resObj.token.isEmpty()) {
+                            callback.onError(language.t("password_change.invalid_response"));
+                            return;
+                        }
+
+                        callback.onSuccess(resObj);
+                    } catch (Exception e) {
+                        callback.onError(language.format("password_change.parse_error", e.getMessage()));
+                    }
+                }
+            });
+        } catch (Exception e) {
+            callback.onError(language.format("password_change.error", e.getMessage()));
+        }
+    }
+
     public static void register(Context context, String username, String email, String password, AuthResultCallback callback) {
         LanguageService language = LanguageService.get(context);
         try {

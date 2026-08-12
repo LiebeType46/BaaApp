@@ -10,10 +10,13 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,11 +28,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import org.baanet.baaapp.Csv.CsvImporter;
+import org.baanet.baaapp.api.AuthApi;
 import org.baanet.baaapp.common.ConstCode;
 import org.baanet.baaapp.common.LanguageService;
 import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
 import org.baanet.baaapp.data.SearchConditionEntity;
+import org.baanet.baaapp.login.AuthResponse;
 import org.baanet.baaapp.location.LocationPermissionHelper;
 import org.baanet.baaapp.location.LocationService;
 import org.baanet.baaapp.map.MapService;
@@ -405,6 +410,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         TextView userInfo = findViewById(R.id.tvUserInfo);
         TextView userInfoEdit = findViewById(R.id.tvUserInfoEdit);
         TextView userInfoDetails = findViewById(R.id.tvUserInfoDetails);
+        TextView changePassword = findViewById(R.id.tvChangePassword);
         TextView logout = findViewById(R.id.tvLogout);
         TextView dataManagementBack = findViewById(R.id.tvDataManagementBack);
         TextView dataManagementTitle = findViewById(R.id.tvDataManagementTitle);
@@ -426,6 +432,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         userInfo.setText(language.t("settings.user_info"));
         userInfoEdit.setText(language.t("settings.edit"));
         userInfoDetails.setText(buildUserInfoText());
+        changePassword.setText(language.t("settings.change_password"));
         logout.setText(language.t("settings.logout"));
         dataManagementBack.setText(language.t("settings.back"));
         dataManagementTitle.setText(language.t("settings.data_management"));
@@ -457,6 +464,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         userInfoEdit.setOnClickListener(v ->
                 Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
         );
+        changePassword.setOnClickListener(v -> showChangePasswordDialog());
         logout.setOnClickListener(v -> showConfirmDialog(
                 language.t("settings.logout"),
                 language.t("settings.confirm_logout")
@@ -546,6 +554,105 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 )
                 .setNegativeButton(language.t("common.cancel"), null)
                 .show();
+    }
+
+    private void showChangePasswordDialog() {
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        int padding = (int) (24 * getResources().getDisplayMetrics().density);
+        container.setPadding(padding, padding / 2, padding, 0);
+
+        EditText currentPassword = createPasswordInput(language.t("password_change.current_hint"));
+        EditText newPassword = createPasswordInput(language.t("password_change.new_hint"));
+        EditText confirmPassword = createPasswordInput(language.t("password_change.confirm_hint"));
+
+        container.addView(currentPassword);
+        container.addView(newPassword);
+        container.addView(confirmPassword);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(language.t("password_change.title"))
+                .setView(container)
+                .setPositiveButton(language.t("password_change.execute"), null)
+                .setNegativeButton(language.t("common.cancel"), null)
+                .create();
+
+        dialog.setOnShowListener(d -> {
+            Button executeButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            executeButton.setOnClickListener(v -> executePasswordChange(
+                    dialog,
+                    executeButton,
+                    currentPassword.getText().toString(),
+                    newPassword.getText().toString(),
+                    confirmPassword.getText().toString()
+            ));
+        });
+
+        dialog.show();
+    }
+
+    private EditText createPasswordInput(String hint) {
+        EditText input = new EditText(this);
+        input.setHint(hint);
+        input.setSingleLine(true);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        return input;
+    }
+
+    private void executePasswordChange(
+            AlertDialog dialog,
+            Button executeButton,
+            String currentPassword,
+            String newPassword,
+            String confirmPassword
+    ) {
+        if (currentPassword.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
+            Toast.makeText(this, language.t("password_change.input_required"), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            Toast.makeText(this, language.t("password_change.mismatch"), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (currentPassword.equals(newPassword)) {
+            Toast.makeText(this, language.t("password_change.same_password"), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (newPassword.length() < 8) {
+            Toast.makeText(this, language.t("password_change.too_short"), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        SharedPreferences prefs = getSharedPreferences(PREF, MODE_PRIVATE);
+        String token = prefs.getString(KEY_TOKEN, null);
+        if (token == null || token.isBlank()) {
+            Toast.makeText(this, language.t("password_change.no_token"), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        executeButton.setEnabled(false);
+        AuthApi.changePassword(this, token, currentPassword, newPassword, new AuthApi.AuthResultCallback() {
+            @Override
+            public void onSuccess(AuthResponse response) {
+                runOnUiThread(() -> {
+                    executeButton.setEnabled(true);
+                    prefs.edit()
+                            .putString(KEY_TOKEN, response.token)
+                            .putString(KEY_PUBLIC_ID, response.publicId)
+                            .apply();
+                    Toast.makeText(MainActivity.this, language.t("password_change.complete"), Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                runOnUiThread(() -> {
+                    executeButton.setEnabled(true);
+                    Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 
     private String buildUserInfoText() {
