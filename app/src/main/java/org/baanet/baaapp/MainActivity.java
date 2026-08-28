@@ -32,6 +32,7 @@ import org.baanet.baaapp.api.AuthApi;
 import org.baanet.baaapp.common.ConstCode;
 import org.baanet.baaapp.common.LanguageService;
 import org.baanet.baaapp.common.UserDataScope;
+import org.baanet.baaapp.connection.SvConnectService;
 import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
 import org.baanet.baaapp.data.SearchConditionEntity;
@@ -552,7 +553,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .setTitle(language.t("settings.server_communication_title"))
                 .setView(communicationSpinner)
                 .setPositiveButton(language.t("settings.sync_execute"), (dialog, which) ->
-                        Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+                        SvConnectService.upload(this)
                 )
                 .setNegativeButton(language.t("common.cancel"), null)
                 .show();

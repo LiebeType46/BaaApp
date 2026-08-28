@@ -41,7 +41,7 @@ public interface LocationDao {
     List<LocationEntity> getUnownedUnuploadedLocations();
 
     @Query("UPDATE locations SET uploadFlg = 1 WHERE id IN (:ids)")
-    int markUploaded(List<Long> ids);
+    int markUploaded(List<Integer> ids);
 
     @Query("SELECT * FROM locations WHERE ownerPublicId = :ownerPublicId ORDER BY timestamp DESC LIMIT :limit")
     List<LocationEntity> getLatestLocationsByOwner(String ownerPublicId, int limit);
