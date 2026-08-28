@@ -9,6 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.baanet.baaapp.api.ApiEndpoint;
 import org.baanet.baaapp.api.ApiRequest;
 import org.baanet.baaapp.api.AuthApi;
+import org.baanet.baaapp.common.UserDataScope;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -21,6 +24,7 @@ public class LauncherActivity extends AppCompatActivity {
 
     private static final String PREF = "baa_prefs";
     private static final String KEY_TOKEN = "token";
+    private static final String KEY_PUBLIC_ID = "public_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +50,15 @@ public class LauncherActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
 
                 if (response.isSuccessful()) {
+                    String resBody = response.body() != null ? response.body().string() : "";
+                    String publicId = readPublicId(resBody);
+                    if (publicId != null) {
+                        getSharedPreferences(PREF, MODE_PRIVATE)
+                                .edit()
+                                .putString(KEY_PUBLIC_ID, publicId)
+                                .apply();
+                        UserDataScope.claimUnownedLocalData(LauncherActivity.this, publicId);
+                    }
                     runOnUiThread(() -> goMain());
                 } else {
                     getSharedPreferences(PREF, MODE_PRIVATE)
@@ -67,5 +80,18 @@ public class LauncherActivity extends AppCompatActivity {
     private void goMain() {
         startActivity(new Intent(this, MainActivity.class));
         finish();
+    }
+
+    private String readPublicId(String responseBody) {
+        try {
+            JSONObject json = new JSONObject(responseBody);
+            String publicId = json.optString(KEY_PUBLIC_ID, null);
+            if (publicId == null || publicId.isBlank()) {
+                return null;
+            }
+            return publicId;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

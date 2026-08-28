@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat;
 
 import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
+import org.baanet.baaapp.common.UserDataScope;
 
 import org.osmdroid.util.GeoPoint;
 
@@ -33,6 +34,7 @@ public class LocationService {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private static final long TIMEOUT_MS = 100000; // タイムアウト時間（ミリ秒）
     private final AppDatabase db;
+    private final Context appContext;
     private static LocationService instance = null;
     private Handler pollingHandler = new Handler(Looper.getMainLooper());
     private Runnable pollingRunnable;
@@ -49,8 +51,9 @@ public class LocationService {
     }
 
     public LocationService(Context context) {
+        appContext = context.getApplicationContext();
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        db = AppDatabase.getInstance(context.getApplicationContext());
+        db = AppDatabase.getInstance(appContext);
 
         String dbPath = context.getDatabasePath("locations.db").getAbsolutePath();
         Log.d("LocationService", "データベースのフルパス: " + dbPath);
@@ -128,6 +131,7 @@ public class LocationService {
 
     public void saveLocation(String category, String subCategory, double latitude, double longitude, String timestamp, String memo, boolean uploadFlg, String photoPath) {
         LocationEntity locationEntity = createLocationEntity(category, subCategory, latitude, longitude, timestamp, memo, uploadFlg, photoPath);
+        locationEntity.setOwnerPublicId(getCurrentOwnerPublicId());
 
         db.locationDao().insert(locationEntity);
         Log.d("LocationService", "データが保存されました。");
@@ -241,7 +245,10 @@ public class LocationService {
         String oneMonthAgo = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 .format(new Date(System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000));
 
-        List<LocationEntity> recentLocations = db.locationDao().getLocationsWithinTimeRange(oneMonthAgo);
+        String ownerPublicId = getCurrentOwnerPublicId();
+        List<LocationEntity> recentLocations = ownerPublicId != null
+                ? db.locationDao().getLocationsWithinTimeRangeByOwner(ownerPublicId, oneMonthAgo)
+                : db.locationDao().getUnownedLocationsWithinTimeRange(oneMonthAgo);
 
         if (currentLocation == null) return recentLocations; // fallback
 
@@ -259,14 +266,34 @@ public class LocationService {
     }
 
     public List<LocationEntity> getLatestLocations(int limit) {
-        return db.locationDao().getLatestLocations(limit);
+        String ownerPublicId = getCurrentOwnerPublicId();
+        return ownerPublicId != null
+                ? db.locationDao().getLatestLocationsByOwner(ownerPublicId, limit)
+                : db.locationDao().getLatestUnownedLocations(limit);
     }
 
     public List<LocationEntity> getAllLocationsLatestFirst() {
-        return db.locationDao().getAllLocationsLatestFirst();
+        String ownerPublicId = getCurrentOwnerPublicId();
+        return ownerPublicId != null
+                ? db.locationDao().getAllLocationsLatestFirstByOwner(ownerPublicId)
+                : db.locationDao().getAllUnownedLocationsLatestFirst();
     }
 
     public LocationEntity getLocationById(int id) {
-        return db.locationDao().findById(id);
+        String ownerPublicId = getCurrentOwnerPublicId();
+        return ownerPublicId != null
+                ? db.locationDao().findByIdAndOwner(id, ownerPublicId)
+                : db.locationDao().findUnownedById(id);
+    }
+
+    public List<LocationEntity> getUnuploadedLocations() {
+        String ownerPublicId = getCurrentOwnerPublicId();
+        return ownerPublicId != null
+                ? db.locationDao().getUnuploadedLocationsByOwner(ownerPublicId)
+                : db.locationDao().getUnownedUnuploadedLocations();
+    }
+
+    private String getCurrentOwnerPublicId() {
+        return UserDataScope.getCurrentPublicId(appContext);
     }
 }

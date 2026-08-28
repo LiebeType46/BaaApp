@@ -8,6 +8,7 @@ import org.baanet.baaapp.data.LocationEntity;
 import org.baanet.baaapp.common.CategoryLabelResolver;
 import org.baanet.baaapp.common.MainCategory;
 import org.baanet.baaapp.common.MainCategoryConverter;
+import org.baanet.baaapp.common.UserDataScope;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -89,7 +90,9 @@ public class CsvImporter {
             String memo = cols[offset + 5].trim();
             boolean uploadFlg = true;
             String photoPath = cols.length > offset + 6 ? cols[offset + 6].trim() : "";
-            return new LocationEntity(category, subCategory, lat, lon, timestamp, memo, uploadFlg, photoPath);
+            LocationEntity entity = new LocationEntity(category, subCategory, lat, lon, timestamp, memo, uploadFlg, photoPath);
+            entity.setOwnerPublicId(UserDataScope.getCurrentPublicId(context));
+            return entity;
         } catch (Exception e) {
             Log.w("CsvImporter", "変換失敗: " + line);
             return null;

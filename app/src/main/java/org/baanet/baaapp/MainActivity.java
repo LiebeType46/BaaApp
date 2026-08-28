@@ -31,6 +31,7 @@ import org.baanet.baaapp.Csv.CsvImporter;
 import org.baanet.baaapp.api.AuthApi;
 import org.baanet.baaapp.common.ConstCode;
 import org.baanet.baaapp.common.LanguageService;
+import org.baanet.baaapp.common.UserDataScope;
 import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
 import org.baanet.baaapp.data.SearchConditionEntity;
@@ -141,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mapService = new MapService(mapView);
 
         db = AppDatabase.getInstance(getApplicationContext());
+        UserDataScope.claimUnownedLocalData(this, getCurrentOwnerPublicId());
         loadCurrentSearchCondition();
 
         // ユーザー情報確認
@@ -691,9 +693,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         if (currentSearchCondition.hasAnyCondition()
                 || currentSearchCondition.hasCustomResultLimit()) {
-            db.searchConditionDao().save(SearchConditionMapper.toEntity(currentSearchCondition));
+            db.searchConditionDao().save(SearchConditionMapper.toEntity(
+                    currentSearchCondition,
+                    getSearchConditionId(SearchConditionEntity.CURRENT_ID),
+                    getCurrentOwnerPublicId()
+            ));
         } else {
-            db.searchConditionDao().clearCurrent();
+            db.searchConditionDao().clearById(getSearchConditionId(SearchConditionEntity.CURRENT_ID));
         }
 
         reloadBySearchCondition();
@@ -701,20 +707,32 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private void loadCurrentSearchCondition() {
         ensureDefaultSearchCondition();
-        currentSearchCondition = SearchConditionMapper.toDto(db.searchConditionDao().getCurrent());
+        currentSearchCondition = SearchConditionMapper.toDto(
+                db.searchConditionDao().getById(getSearchConditionId(SearchConditionEntity.CURRENT_ID))
+        );
     }
 
     private void ensureDefaultSearchCondition() {
-        defaultSearchCondition = SearchConditionMapper.toDto(db.searchConditionDao().getDefault());
+        String defaultId = getSearchConditionId(SearchConditionEntity.DEFAULT_ID);
+        defaultSearchCondition = SearchConditionMapper.toDto(db.searchConditionDao().getById(defaultId));
         if (defaultSearchCondition.getResultLimit() == null) {
             defaultSearchCondition = SearchCondition.createDefault();
             db.searchConditionDao().save(
                     SearchConditionMapper.toEntity(
                             defaultSearchCondition,
-                            SearchConditionEntity.DEFAULT_ID
+                            defaultId,
+                            getCurrentOwnerPublicId()
                     )
             );
         }
+    }
+
+    private String getSearchConditionId(String kind) {
+        return UserDataScope.getSearchConditionId(getCurrentOwnerPublicId(), kind);
+    }
+
+    private String getCurrentOwnerPublicId() {
+        return UserDataScope.getCurrentPublicId(this);
     }
 
     private SearchCondition getEffectiveSearchCondition() {

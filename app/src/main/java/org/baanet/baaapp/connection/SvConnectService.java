@@ -5,6 +5,7 @@ import android.content.Context;
 import org.baanet.baaapp.Csv.CsvExporter;
 import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
+import org.baanet.baaapp.common.UserDataScope;
 
 import java.io.File;
 import java.util.List;
@@ -13,7 +14,10 @@ public class SvConnectService {
     public static void upload(Context context) {
 
         // uploadFlgが立っていないデータを一括所得
-        List<LocationEntity> unuploadedLocations = AppDatabase.getInstance(context).locationDao().getUnuploadedLocations();
+        String ownerPublicId = UserDataScope.getCurrentPublicId(context);
+        List<LocationEntity> unuploadedLocations = ownerPublicId != null
+                ? AppDatabase.getInstance(context).locationDao().getUnuploadedLocationsByOwner(ownerPublicId)
+                : AppDatabase.getInstance(context).locationDao().getUnownedUnuploadedLocations();
 
         if (unuploadedLocations.isEmpty()) {
             return;

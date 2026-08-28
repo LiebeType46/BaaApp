@@ -12,6 +12,7 @@ import org.baanet.baaapp.MainActivity;
 import org.baanet.baaapp.R;
 import org.baanet.baaapp.api.AuthApi;
 import org.baanet.baaapp.common.LanguageService;
+import org.baanet.baaapp.common.UserDataScope;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -86,6 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                         .putString(KEY_TOKEN, resObj.token)
                         .putString(KEY_PUBLIC_ID, resObj.publicId)
                         .apply();
+                UserDataScope.claimUnownedLocalData(LoginActivity.this, resObj.publicId);
 
                 runOnUiThread(() -> {
                     tvStatus.setText(language.t("login.ok"));

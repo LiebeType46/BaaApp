@@ -14,6 +14,7 @@ import org.baanet.baaapp.MainActivity;
 import org.baanet.baaapp.R;
 import org.baanet.baaapp.api.AuthApi;
 import org.baanet.baaapp.common.LanguageService;
+import org.baanet.baaapp.common.UserDataScope;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -75,6 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
                             .putString(KEY_TOKEN, response.token)
                             .putString(KEY_PUBLIC_ID, response.publicId)
                             .apply();
+                    UserDataScope.claimUnownedLocalData(RegisterActivity.this, response.publicId);
 
                     startActivity(new Intent(RegisterActivity.this, MainActivity.class));
                     finish();

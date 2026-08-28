@@ -19,6 +19,7 @@ public class LocationEntity {
     private String timestamp;
     private String memo;
     private boolean uploadFlg;
+    private String ownerPublicId;
 
 
     public LocationEntity(String category, String subCategory, double latitude, double longitude, String timestamp, String memo, boolean uploadFlg, String photoUri) {
@@ -97,6 +98,22 @@ public class LocationEntity {
         this.uploadFlg = uploadFlg;
     }
 
+    public String getOwnerPublicId() {
+        return ownerPublicId;
+    }
+
+    public void setOwnerPublicId(String ownerPublicId) {
+        this.ownerPublicId = normalizeOwnerPublicId(ownerPublicId);
+    }
+
+    private String normalizeOwnerPublicId(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
 
     private String photoUri;
 

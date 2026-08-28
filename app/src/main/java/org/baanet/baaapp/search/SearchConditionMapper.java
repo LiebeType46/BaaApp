@@ -29,6 +29,12 @@ public class SearchConditionMapper {
         return entity;
     }
 
+    public static SearchConditionEntity toEntity(SearchCondition condition, String id, String ownerPublicId) {
+        SearchConditionEntity entity = toEntity(condition, id);
+        entity.ownerPublicId = normalizeOwnerPublicId(ownerPublicId);
+        return entity;
+    }
+
     public static SearchCondition toDto(SearchConditionEntity entity) {
         if (entity == null) {
             return new SearchCondition();
@@ -45,5 +51,14 @@ public class SearchConditionMapper {
                 entity.radiusMeters,
                 entity.resultLimit
         );
+    }
+
+    private static String normalizeOwnerPublicId(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

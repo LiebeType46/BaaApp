@@ -23,6 +23,7 @@ public class SearchConditionEntity {
     public Boolean uploadFlg;
     public Double radiusMeters;
     public Integer resultLimit;
+    public String ownerPublicId;
 
     public SearchConditionEntity() {
     }
