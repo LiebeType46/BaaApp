@@ -138,7 +138,7 @@ public class PhotoService {
         }
 
         String trimmed = value.trim();
-        if (trimmed.isEmpty()) {
+        if (trimmed.isEmpty() || "null".equalsIgnoreCase(trimmed)) {
             return null;
         }
 

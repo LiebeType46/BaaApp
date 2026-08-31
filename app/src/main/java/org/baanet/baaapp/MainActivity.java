@@ -899,7 +899,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private boolean hasPhoto(LocationEntity entity) {
         String photoUri = normalizeSearchText(entity.getPhotoUri());
-        return photoUri != null;
+        return photoUri != null && photoUri.startsWith("photos/");
     }
 
     private Date parseTimestamp(String value) {
@@ -943,6 +943,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
         String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
+        return trimmed.isEmpty() || "null".equalsIgnoreCase(trimmed) ? null : trimmed;
     }
 }

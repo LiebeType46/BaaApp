@@ -40,10 +40,10 @@ public interface LocationDao {
     @Query("SELECT * FROM locations WHERE ownerPublicId IS NULL AND uploadFlg = 0 ORDER BY id ASC")
     List<LocationEntity> getUnownedUnuploadedLocations();
 
-    @Query("SELECT * FROM locations WHERE ownerPublicId = :ownerPublicId AND (uploadFlg = 0 OR (serverLocationId IS NULL AND photoUri IS NOT NULL AND photoUri != '')) ORDER BY id ASC")
+    @Query("SELECT * FROM locations WHERE ownerPublicId = :ownerPublicId AND (uploadFlg = 0 OR (serverLocationId IS NULL AND photoUri LIKE 'photos/%')) ORDER BY id ASC")
     List<LocationEntity> getLocationsNeedingServerSyncByOwner(String ownerPublicId);
 
-    @Query("SELECT * FROM locations WHERE ownerPublicId IS NULL AND (uploadFlg = 0 OR (serverLocationId IS NULL AND photoUri IS NOT NULL AND photoUri != '')) ORDER BY id ASC")
+    @Query("SELECT * FROM locations WHERE ownerPublicId IS NULL AND (uploadFlg = 0 OR (serverLocationId IS NULL AND photoUri LIKE 'photos/%')) ORDER BY id ASC")
     List<LocationEntity> getUnownedLocationsNeedingServerSync();
 
     @Query("UPDATE locations SET uploadFlg = 1 WHERE id IN (:ids)")
@@ -58,10 +58,10 @@ public interface LocationDao {
     @Query("UPDATE locations SET photoUploadFlg = 0, photoUploadRetryCount = photoUploadRetryCount + 1, lastPhotoUploadError = :error WHERE id = :localId")
     int markPhotoUploadFailed(int localId, String error);
 
-    @Query("SELECT * FROM locations WHERE ownerPublicId = :ownerPublicId AND uploadFlg = 1 AND photoUploadFlg = 0 AND serverLocationId IS NOT NULL AND photoUri IS NOT NULL AND photoUri != '' ORDER BY id ASC")
+    @Query("SELECT * FROM locations WHERE ownerPublicId = :ownerPublicId AND uploadFlg = 1 AND photoUploadFlg = 0 AND serverLocationId IS NOT NULL AND photoUri LIKE 'photos/%' ORDER BY id ASC")
     List<LocationEntity> getPendingPhotoUploadsByOwner(String ownerPublicId);
 
-    @Query("SELECT * FROM locations WHERE ownerPublicId IS NULL AND uploadFlg = 1 AND photoUploadFlg = 0 AND serverLocationId IS NOT NULL AND photoUri IS NOT NULL AND photoUri != '' ORDER BY id ASC")
+    @Query("SELECT * FROM locations WHERE ownerPublicId IS NULL AND uploadFlg = 1 AND photoUploadFlg = 0 AND serverLocationId IS NOT NULL AND photoUri LIKE 'photos/%' ORDER BY id ASC")
     List<LocationEntity> getUnownedPendingPhotoUploads();
 
     @Query("SELECT * FROM locations WHERE ownerPublicId = :ownerPublicId ORDER BY timestamp DESC LIMIT :limit")
