@@ -14,7 +14,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import org.baanet.baaapp.common.MainCategoryConverter;
 
-@Database(entities = {LocationEntity.class, SearchConditionEntity.class}, version = 12, exportSchema = false)
+@Database(entities = {LocationEntity.class, SearchConditionEntity.class}, version = 13, exportSchema = false)
 @TypeConverters({MainCategoryConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -42,6 +42,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             .addMigrations(MIGRATION_9_10)
                             .addMigrations(MIGRATION_10_11)
                             .addMigrations(MIGRATION_11_12)
+                            .addMigrations(MIGRATION_12_13)
                             .build();
                     Log.d("AppDatabase", "AppDatabase initialized");
                 }
@@ -235,6 +236,16 @@ public abstract class AppDatabase extends RoomDatabase {
         public void migrate(@NonNull SupportSQLiteDatabase db) {
             db.execSQL("ALTER TABLE locations ADD COLUMN ownerPublicId TEXT");
             db.execSQL("ALTER TABLE search_condition ADD COLUMN ownerPublicId TEXT");
+        }
+    };
+
+    static final Migration MIGRATION_12_13 = new Migration(12, 13) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE locations ADD COLUMN serverLocationId INTEGER");
+            db.execSQL("ALTER TABLE locations ADD COLUMN photoUploadFlg INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE locations ADD COLUMN photoUploadRetryCount INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE locations ADD COLUMN lastPhotoUploadError TEXT");
         }
     };
 

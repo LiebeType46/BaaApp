@@ -10,4 +10,8 @@ public final class ApiEndpoint {
     public static final String CHANGE_PASSWORD = "/auth/password/change";
     public static final String LOCATIONS_SYNC = "/locations/sync";
 
+    public static String locationPhoto(long serverLocationId) {
+        return "/locations/" + serverLocationId + "/photo";
+    }
+
 }

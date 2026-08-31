@@ -20,6 +20,10 @@ public class LocationEntity {
     private String memo;
     private boolean uploadFlg;
     private String ownerPublicId;
+    private Long serverLocationId;
+    private boolean photoUploadFlg;
+    private int photoUploadRetryCount;
+    private String lastPhotoUploadError;
 
 
     public LocationEntity(String category, String subCategory, double latitude, double longitude, String timestamp, String memo, boolean uploadFlg, String photoUri) {
@@ -104,6 +108,38 @@ public class LocationEntity {
 
     public void setOwnerPublicId(String ownerPublicId) {
         this.ownerPublicId = normalizeOwnerPublicId(ownerPublicId);
+    }
+
+    public Long getServerLocationId() {
+        return serverLocationId;
+    }
+
+    public void setServerLocationId(Long serverLocationId) {
+        this.serverLocationId = serverLocationId;
+    }
+
+    public boolean isPhotoUploadFlg() {
+        return photoUploadFlg;
+    }
+
+    public void setPhotoUploadFlg(boolean photoUploadFlg) {
+        this.photoUploadFlg = photoUploadFlg;
+    }
+
+    public int getPhotoUploadRetryCount() {
+        return photoUploadRetryCount;
+    }
+
+    public void setPhotoUploadRetryCount(int photoUploadRetryCount) {
+        this.photoUploadRetryCount = Math.max(photoUploadRetryCount, 0);
+    }
+
+    public String getLastPhotoUploadError() {
+        return lastPhotoUploadError;
+    }
+
+    public void setLastPhotoUploadError(String lastPhotoUploadError) {
+        this.lastPhotoUploadError = lastPhotoUploadError;
     }
 
     private String normalizeOwnerPublicId(String value) {

@@ -7,6 +7,7 @@ public class LocationSyncResponse {
 
     public String resCode;
     public List<Integer> uploadedLocalIds = new ArrayList<>();
+    public List<UploadedLocationResponse> uploadedLocations = new ArrayList<>();
 
     public boolean isOk() {
         return "OK".equals(resCode);
