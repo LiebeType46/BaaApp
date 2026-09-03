@@ -62,7 +62,7 @@ public class DialogHelper {
         DialogHelper dialog = new DialogHelper(
                 activity,
                 activity.getLocationService(),
-                activity::refreshMarkers
+                activity::onLocationSaved
         );
         dialog.show();
     }

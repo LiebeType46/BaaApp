@@ -14,6 +14,7 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -32,6 +33,7 @@ import org.baanet.baaapp.api.AuthApi;
 import org.baanet.baaapp.common.ConstCode;
 import org.baanet.baaapp.common.LanguageService;
 import org.baanet.baaapp.common.UserDataScope;
+import org.baanet.baaapp.connection.AutoSyncService;
 import org.baanet.baaapp.connection.SvConnectService;
 import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
@@ -84,6 +86,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private GeoPoint lastLocationPoint = null;
     public void refreshMarkers() {
         reloadMapMarkers(null);
+    }
+
+    public void onLocationSaved() {
+        refreshMarkers();
+        AutoSyncService.requestPostSync(this);
     }
     private BottomNavigationView bottomNavigation;
     private FloatingActionButton fabMenu;
@@ -233,6 +240,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         showMapMode();
         handleFocusLocationIntent(getIntent());
+        AutoSyncService.requestStartupSync(this);
     }
 
 
@@ -270,6 +278,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 lastLocationPoint = point;
             }
         });
+
+        AutoSyncService.requestResumeSync(this);
     }
 
     @Override
@@ -537,26 +547,33 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     private void showServerCommunicationDialog() {
-        Spinner communicationSpinner = new Spinner(this);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                new String[]{
-                        language.t("settings.communication_manual"),
-                        language.t("settings.communication_auto")
-                }
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        communicationSpinner.setAdapter(adapter);
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        int padding = (int) (24 * getResources().getDisplayMetrics().density);
+        container.setPadding(padding, padding / 2, padding, 0);
 
-        new AlertDialog.Builder(this)
+        CheckBox autoSyncCheck = new CheckBox(this);
+        autoSyncCheck.setText(language.t("settings.auto_sync_enabled"));
+        autoSyncCheck.setChecked(AutoSyncService.isAutoSyncEnabled(this));
+
+        Button manualSyncButton = new Button(this);
+        manualSyncButton.setText(language.t("settings.manual_sync_now"));
+
+        container.addView(autoSyncCheck);
+        container.addView(manualSyncButton);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(language.t("settings.server_communication_title"))
-                .setView(communicationSpinner)
-                .setPositiveButton(language.t("settings.sync_execute"), (dialog, which) ->
-                        SvConnectService.upload(this)
-                )
-                .setNegativeButton(language.t("common.cancel"), null)
-                .show();
+                .setView(container)
+                .setPositiveButton(language.t("settings.ok"), null)
+                .create();
+
+        autoSyncCheck.setOnCheckedChangeListener((buttonView, isChecked) ->
+                AutoSyncService.setAutoSyncEnabled(this, isChecked)
+        );
+        manualSyncButton.setOnClickListener(v -> SvConnectService.upload(this));
+
+        dialog.show();
     }
 
     private void showChangePasswordDialog() {
