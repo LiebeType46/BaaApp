@@ -295,16 +295,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        AppDatabase.getInstance(this).flushToDisk();
-    }
-
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
-        AppDatabase.getInstance(getApplicationContext()).checkpoint();
         mapView.onDetach();
     }
 

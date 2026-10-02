@@ -24,7 +24,6 @@ public final class SessionHelper {
         Intent intent = new Intent(activity, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         activity.startActivity(intent);
-        activity.finish();
     }
 
     public static boolean isCurrentToken(Context context, String token) {
