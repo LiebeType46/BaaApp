@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -585,26 +584,22 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         container.addView(autoSyncLabel);
         container.addView(autoSyncSpinner);
-        container.addView(manualSyncButton);
+        LinearLayout.LayoutParams manualSyncParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        manualSyncParams.setMargins(0, padding, 0, padding);
+        container.addView(manualSyncButton, manualSyncParams);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(language.t("settings.server_communication_title"))
                 .setView(container)
-                .setPositiveButton(language.t("settings.ok"), null)
+                .setPositiveButton(language.t("common.apply"), (d, which) -> {
+                    AutoSyncService.setIntervalMinutes(this, intervals[autoSyncSpinner.getSelectedItemPosition()]);
+                    Toast.makeText(this, language.t("settings.sync_settings_complete"), Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton(language.t("common.cancel"), null)
                 .create();
 
-        autoSyncSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (AutoSyncService.getIntervalMinutes(MainActivity.this) != intervals[position]) {
-                    AutoSyncService.setIntervalMinutes(MainActivity.this, intervals[position]);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
+        dialog.setCanceledOnTouchOutside(true);
         manualSyncButton.setOnClickListener(v -> SvConnectService.upload(this));
 
         dialog.show();
