@@ -12,6 +12,7 @@ import org.baanet.baaapp.common.LanguageService;
 import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
 import org.baanet.baaapp.common.UserDataScope;
+import org.baanet.baaapp.login.SessionHelper;
 import org.baanet.baaapp.sync.LocationSyncRequest;
 import org.baanet.baaapp.sync.LocationSyncResponse;
 import org.baanet.baaapp.sync.LocationUploadRequest;
@@ -102,6 +103,10 @@ public class SvConnectService {
             @Override
             public void onSuccess(LocationSyncResponse response) {
                 mainHandler.post(() -> {
+                    if (!SessionHelper.isCurrentToken(appContext, token)) {
+                        callback.onError(language.t("sync.no_login"));
+                        return;
+                    }
                     if (response == null || !response.isOk() || response.uploadedLocations == null) {
                         Log.w(TAG, "Upload failed: invalid success response");
                         callback.onError(language.format("sync.failed", ""));
@@ -191,6 +196,10 @@ public class SvConnectService {
             LanguageService language,
             int uploadedLocationCount
     ) {
+        if (!SessionHelper.isCurrentToken(appContext, token)) {
+            callback.onError(language.t("sync.no_login"));
+            return;
+        }
         if (index >= pendingPhotos.size()) {
             Log.d(TAG, "Photo upload finished success=" + summary.successCount + ", failed=" + summary.failedCount);
             callback.onComplete(uploadedLocationCount, summary.successCount, summary.failedCount);
@@ -222,6 +231,10 @@ public class SvConnectService {
             @Override
             public void onSuccess(String responseBody) {
                 mainHandler.post(() -> {
+                    if (!SessionHelper.isCurrentToken(appContext, token)) {
+                        callback.onError(language.t("sync.no_login"));
+                        return;
+                    }
                     Log.d(TAG, "Photo upload succeeded localId=" + location.getId()
                             + ", serverLocationId=" + serverLocationId);
                     db.locationDao().markPhotoUploaded(location.getId());
@@ -285,6 +298,10 @@ public class SvConnectService {
             LocationEntity location,
             String error
     ) {
+        if (!SessionHelper.isCurrentToken(appContext, token)) {
+            callback.onError(language.t("sync.no_login"));
+            return;
+        }
         Log.w(TAG, "Photo upload failed localId=" + location.getId()
                 + ", attempt=" + attempt + "/" + PHOTO_UPLOAD_MAX_ATTEMPTS
                 + ", error=" + error);

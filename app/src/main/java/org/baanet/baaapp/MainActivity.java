@@ -39,6 +39,7 @@ import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
 import org.baanet.baaapp.data.SearchConditionEntity;
 import org.baanet.baaapp.login.AuthResponse;
+import org.baanet.baaapp.login.SessionHelper;
 import org.baanet.baaapp.location.LocationPermissionHelper;
 import org.baanet.baaapp.location.LocationService;
 import org.baanet.baaapp.map.MapService;
@@ -173,6 +174,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         // 非同期で現在地を取得 → 反映
         locationService.getCurrentLocationAsync(ctx, (GeoPoint location) -> {
+            if (isFinishing() || isDestroyed()) {
+                return;
+            }
             if (location != null) {
                 markerManager.updateCurrentLocation(this, location, language.t("main.current_location"));
                 // 🔥 中心移動を遅延実行
@@ -478,10 +482,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
         );
         changePassword.setOnClickListener(v -> showChangePasswordDialog());
-        logout.setOnClickListener(v -> showConfirmDialog(
-                language.t("settings.logout"),
-                language.t("settings.confirm_logout")
-        ));
+        logout.setOnClickListener(v -> showLogoutDialog());
         csvIo.setOnClickListener(v -> showCsvIoDialog());
         serverConnection.setOnClickListener(v -> showServerCommunicationDialog());
     }
@@ -520,6 +521,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .setMessage(message)
                 .setPositiveButton(language.t("settings.ok"), (dialog, which) ->
                         Toast.makeText(this, language.t("settings.placeholder"), Toast.LENGTH_SHORT).show()
+                )
+                .setNegativeButton(language.t("common.cancel"), null)
+                .show();
+    }
+
+    private void showLogoutDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(language.t("settings.logout"))
+                .setMessage(language.t("settings.confirm_logout"))
+                .setPositiveButton(language.t("settings.logout"), (dialog, which) ->
+                        SessionHelper.logout(this)
                 )
                 .setNegativeButton(language.t("common.cancel"), null)
                 .show();
@@ -655,6 +667,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             @Override
             public void onSuccess(AuthResponse response) {
                 runOnUiThread(() -> {
+                    if (!SessionHelper.isCurrentToken(MainActivity.this, token)) {
+                        return;
+                    }
                     executeButton.setEnabled(true);
                     prefs.edit()
                             .putString(KEY_TOKEN, response.token)

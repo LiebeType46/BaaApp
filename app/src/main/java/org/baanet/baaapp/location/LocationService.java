@@ -39,6 +39,7 @@ public class LocationService {
     private Handler pollingHandler = new Handler(Looper.getMainLooper());
     private Runnable pollingRunnable;
     private boolean isPolling = false;
+    private LocationListener pollingListener;
     private static final long POLLING_INTERVAL_MS = 10_000;
 
     private String provider;
@@ -198,6 +199,7 @@ public class LocationService {
             String provider = getBestProvider();
             if (provider != null) {
                 locationManager.requestLocationUpdates(provider, POLLING_INTERVAL_MS, 0, systemListener);
+                pollingListener = systemListener;
                 isPolling = true;
                 Log.d("LocationService", "ポーリング開始（システム位置更新）");
             }
@@ -234,11 +236,17 @@ public class LocationService {
 
 
     public void stopLocationPolling() {
-        if (isPolling && pollingRunnable != null) {
+        if (pollingListener != null) {
+            locationManager.removeUpdates(pollingListener);
+            pollingListener = null;
+        }
+        if (pollingRunnable != null) {
             pollingHandler.removeCallbacks(pollingRunnable);
-            isPolling = false;
+        }
+        if (isPolling) {
             Log.d("LocationService", "ポーリング停止");
         }
+        isPolling = false;
     }
 
     public List<LocationEntity> getRecentLocationsSortedByDistance(Context context, GeoPoint currentLocation) {
