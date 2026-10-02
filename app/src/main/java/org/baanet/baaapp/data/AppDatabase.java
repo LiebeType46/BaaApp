@@ -53,22 +53,14 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public void checkpoint() {
-        if (instance != null) {
-            SupportSQLiteDatabase db =
-                    instance.getOpenHelper().getWritableDatabase();
-
-            Cursor cursor = db.query("PRAGMA wal_checkpoint(FULL)");
-            cursor.close();
-
-            instance.close();
-            Log.d("AppDatabase", "チェックポイント & DB クローズ完了");
-        }
+        // The database is shared with login and sync, so an Activity must not close it.
+        flushToDisk();
     }
 
     public void flushToDisk() {
         try {
             SupportSQLiteDatabase db =
-                    instance.getOpenHelper().getWritableDatabase();
+                    getOpenHelper().getWritableDatabase();
 
             Cursor cursor = db.query("PRAGMA wal_checkpoint(FULL)");
             cursor.close();
