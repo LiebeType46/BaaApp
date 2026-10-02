@@ -15,7 +15,6 @@ public final class AutoSyncService {
     private static final Handler handler = new Handler(Looper.getMainLooper());
     private static Context foregroundContext;
     private static Runnable scheduledSync;
-    private static boolean syncing = false;
 
     private AutoSyncService() {
     }
@@ -80,7 +79,7 @@ public final class AutoSyncService {
 
     private static synchronized void scheduleNextSync() {
         cancelScheduledSync();
-        if (foregroundContext == null || syncing) return;
+        if (foregroundContext == null || SvConnectService.isSyncing()) return;
         Context context = foregroundContext;
         int minutes = getIntervalMinutes(context);
         String token = prefs(context).getString("token", null);
@@ -109,22 +108,15 @@ public final class AutoSyncService {
             Log.d(TAG, "Auto sync skipped reason=" + reason + ", autoSyncEnabled=false");
             return;
         }
-        if (syncing) {
-            Log.d(TAG, "Auto sync skipped reason=" + reason + ", already syncing");
-            return;
-        }
-
         String token = prefs(appContext).getString("token", null);
         if (token == null || token.isBlank()) {
             Log.d(TAG, "Auto sync skipped reason=" + reason + ", no login");
             return;
         }
 
-        syncing = true;
-        cancelScheduledSync();
-        Log.d(TAG, "Auto sync started reason=" + reason);
+        Log.d(TAG, "Auto sync requested reason=" + reason);
 
-        SvConnectService.upload(appContext, new SvConnectService.UploadCallback() {
+        SvConnectService.UploadCallback callback = new SvConnectService.UploadCallback() {
             @Override
             public void onComplete(int uploadedCount, int photoUploadedCount, int photoFailedCount) {
                 finish(reason, "complete locations=" + uploadedCount
@@ -141,12 +133,19 @@ public final class AutoSyncService {
             public void onError(String message) {
                 finish(reason, "error=" + message);
             }
-        });
+        };
+        if ("post".equals(reason)) {
+            SvConnectService.uploadAfterPost(appContext, callback);
+        } else {
+            SvConnectService.upload(appContext, callback);
+        }
     }
 
     private static synchronized void finish(String reason, String result) {
-        syncing = false;
         Log.d(TAG, "Auto sync finished reason=" + reason + ", result=" + result);
+    }
+
+    static synchronized void onSyncFinished() {
         scheduleNextSync();
     }
 

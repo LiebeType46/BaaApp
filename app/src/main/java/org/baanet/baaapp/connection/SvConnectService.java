@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SvConnectService {
     private static final String TAG = "BaaSync";
@@ -29,6 +30,7 @@ public class SvConnectService {
     private static final String KEY_TOKEN = "token";
     private static final int PHOTO_UPLOAD_MAX_ATTEMPTS = 3;
     private static final long PHOTO_UPLOAD_RETRY_DELAY_MS = 15_000L;
+    private static final SyncExecutionState executionState = new SyncExecutionState();
 
     public interface UploadCallback {
         void onComplete(int uploadedCount, int photoUploadedCount, int photoFailedCount);
@@ -61,6 +63,76 @@ public class SvConnectService {
     }
 
     public static void upload(Context context, UploadCallback callback) {
+        upload(context, callback, false);
+    }
+
+    static void uploadAfterPost(Context context, UploadCallback callback) {
+        upload(context, callback, true);
+    }
+
+    static boolean isSyncing() {
+        return executionState.isSyncing();
+    }
+
+    private static void upload(Context context, UploadCallback callback, boolean post) {
+        Context appContext = context.getApplicationContext();
+        LanguageService language = LanguageService.get(appContext);
+        String token = appContext.getSharedPreferences(PREF, Context.MODE_PRIVATE).getString(KEY_TOKEN, null);
+        if (token == null || token.isBlank()) {
+            callback.onError(language.t("sync.no_login"));
+            return;
+        }
+        SyncExecutionState.RequestResult result = executionState.request(post, token);
+        if (result != SyncExecutionState.RequestResult.STARTED) {
+            Log.d(TAG, "Upload request " + result + ", post=" + post);
+            callback.onError(language.t("sync.already_syncing"));
+            return;
+        }
+
+        AtomicBoolean finished = new AtomicBoolean();
+        UploadCallback guardedCallback = new UploadCallback() {
+            private boolean finish(boolean success) {
+                if (!finished.compareAndSet(false, true)) return false;
+                String pendingToken = executionState.finish();
+                Handler mainHandler = new Handler(Looper.getMainLooper());
+                // Queue the follow-up before a due periodic sync, after releasing the common guard.
+                if (success && pendingToken != null) {
+                    mainHandler.post(() -> {
+                        if (SessionHelper.isCurrentToken(appContext, pendingToken)) {
+                            AutoSyncService.requestPostSync(appContext);
+                        }
+                    });
+                }
+                AutoSyncService.onSyncFinished();
+                return true;
+            }
+
+            @Override
+            public void onComplete(int uploadedCount, int photoUploadedCount, int photoFailedCount) {
+                if (finish(photoFailedCount == 0)) {
+                    callback.onComplete(uploadedCount, photoUploadedCount, photoFailedCount);
+                }
+            }
+
+            @Override
+            public void onNoTarget() {
+                if (finish(true)) callback.onNoTarget();
+            }
+
+            @Override
+            public void onError(String message) {
+                if (finish(false)) callback.onError(message);
+            }
+        };
+        try {
+            performUpload(appContext, guardedCallback);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Upload initialization failed", e);
+            guardedCallback.onError(language.format("sync.failed", e.getMessage()));
+        }
+    }
+
+    private static void performUpload(Context context, UploadCallback callback) {
         Context appContext = context.getApplicationContext();
         LanguageService language = LanguageService.get(appContext);
         Handler mainHandler = new Handler(Looper.getMainLooper());
