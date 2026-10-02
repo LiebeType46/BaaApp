@@ -82,8 +82,7 @@ public final class AutoSyncService {
         if (foregroundContext == null || SvConnectService.isSyncing()) return;
         Context context = foregroundContext;
         int minutes = getIntervalMinutes(context);
-        String token = prefs(context).getString("token", null);
-        if (minutes == 0 || token == null || token.isBlank()) return;
+        if (minutes == 0) return;
         long delay = SyncSchedule.remainingDelay(System.currentTimeMillis(), getLastSyncAt(context), minutes);
         Log.d(TAG, "Auto sync scheduled delayMs=" + delay + ", intervalMinutes=" + minutes);
         scheduledSync = () -> {
@@ -108,12 +107,6 @@ public final class AutoSyncService {
             Log.d(TAG, "Auto sync skipped reason=" + reason + ", autoSyncEnabled=false");
             return;
         }
-        String token = prefs(appContext).getString("token", null);
-        if (token == null || token.isBlank()) {
-            Log.d(TAG, "Auto sync skipped reason=" + reason + ", no login");
-            return;
-        }
-
         Log.d(TAG, "Auto sync requested reason=" + reason);
 
         SvConnectService.UploadCallback callback = new SvConnectService.UploadCallback() {

@@ -1,7 +1,6 @@
 package org.baanet.baaapp.connection;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -79,6 +78,7 @@ public class SvConnectService {
         LanguageService language = LanguageService.get(appContext);
         String token = appContext.getSharedPreferences(PREF, Context.MODE_PRIVATE).getString(KEY_TOKEN, null);
         if (token == null || token.isBlank()) {
+            Log.d(TAG, "Upload skipped: no login");
             callback.onError(language.t("sync.no_login"));
             return;
         }
@@ -125,28 +125,21 @@ public class SvConnectService {
             }
         };
         try {
-            performUpload(appContext, guardedCallback);
+            performUpload(appContext, token, guardedCallback);
         } catch (RuntimeException e) {
             Log.e(TAG, "Upload initialization failed", e);
             guardedCallback.onError(language.format("sync.failed", e.getMessage()));
         }
     }
 
-    private static void performUpload(Context context, UploadCallback callback) {
+    private static void performUpload(Context context, String token, UploadCallback callback) {
         Context appContext = context.getApplicationContext();
         LanguageService language = LanguageService.get(appContext);
         Handler mainHandler = new Handler(Looper.getMainLooper());
         AppDatabase db = AppDatabase.getInstance(appContext);
 
-        SharedPreferences prefs = appContext.getSharedPreferences(PREF, Context.MODE_PRIVATE);
-        String token = prefs.getString(KEY_TOKEN, null);
         Log.d(TAG, "Upload requested tokenPresent=" + (token != null && !token.isBlank())
                 + ", tokenLength=" + (token != null ? token.length() : 0));
-        if (token == null || token.isBlank()) {
-            Log.w(TAG, "Upload aborted: token is empty");
-            callback.onError(language.t("sync.no_login"));
-            return;
-        }
 
         AutoSyncService.recordSyncStarted(appContext);
 
