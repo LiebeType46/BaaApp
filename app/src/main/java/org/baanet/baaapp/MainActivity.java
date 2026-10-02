@@ -593,8 +593,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .setTitle(language.t("settings.server_communication_title"))
                 .setView(container)
                 .setPositiveButton(language.t("common.apply"), (d, which) -> {
-                    AutoSyncService.setIntervalMinutes(this, intervals[autoSyncSpinner.getSelectedItemPosition()]);
-                    Toast.makeText(this, language.t("settings.sync_settings_complete"), Toast.LENGTH_SHORT).show();
+                    int intervalMinutes = intervals[autoSyncSpinner.getSelectedItemPosition()];
+                    AutoSyncService.setIntervalMinutes(this, intervalMinutes);
+                    String message = intervalMinutes == 0
+                            ? language.t("settings.sync_disabled_complete")
+                            : language.format("settings.sync_settings_complete", intervalMinutes);
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton(language.t("common.cancel"), null)
                 .create();
