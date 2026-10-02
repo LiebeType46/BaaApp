@@ -13,8 +13,8 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private SearchCondition currentSearchCondition = new SearchCondition();
     private SearchCondition defaultSearchCondition = SearchCondition.createDefault();
     private LanguageService language;
+    private boolean firstResume = true;
 
 
     @Override
@@ -244,7 +245,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         showMapMode();
         handleFocusLocationIntent(getIntent());
-        AutoSyncService.requestStartupSync(this);
     }
 
 
@@ -283,12 +283,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
-        AutoSyncService.requestResumeSync(this);
+        if (firstResume) {
+            firstResume = false;
+            AutoSyncService.requestStartupSync(this);
+        } else {
+            AutoSyncService.requestResumeSync(this);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        AutoSyncService.stopForegroundSync();
         mapView.onPause();
 
         locationService.stopLocationPolling();
@@ -556,14 +562,29 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         int padding = (int) (24 * getResources().getDisplayMetrics().density);
         container.setPadding(padding, padding / 2, padding, 0);
 
-        CheckBox autoSyncCheck = new CheckBox(this);
-        autoSyncCheck.setText(language.t("settings.auto_sync_enabled"));
-        autoSyncCheck.setChecked(AutoSyncService.isAutoSyncEnabled(this));
+        TextView autoSyncLabel = new TextView(this);
+        autoSyncLabel.setText(language.t("settings.auto_sync_interval"));
+        Spinner autoSyncSpinner = new Spinner(this);
+        int[] intervals = AutoSyncService.getIntervalOptions();
+        List<String> intervalLabels = new ArrayList<>();
+        int selectedInterval = 0;
+        int currentInterval = AutoSyncService.getIntervalMinutes(this);
+        for (int i = 0; i < intervals.length; i++) {
+            intervalLabels.add(intervals[i] == 0 ? language.t("settings.auto_sync_none")
+                    : language.format("settings.auto_sync_minutes", intervals[i]));
+            if (intervals[i] == currentInterval) selectedInterval = i;
+        }
+        ArrayAdapter<String> intervalAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, intervalLabels);
+        intervalAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        autoSyncSpinner.setAdapter(intervalAdapter);
+        autoSyncSpinner.setSelection(selectedInterval);
 
         Button manualSyncButton = new Button(this);
         manualSyncButton.setText(language.t("settings.manual_sync_now"));
 
-        container.addView(autoSyncCheck);
+        container.addView(autoSyncLabel);
+        container.addView(autoSyncSpinner);
         container.addView(manualSyncButton);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -572,9 +593,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 .setPositiveButton(language.t("settings.ok"), null)
                 .create();
 
-        autoSyncCheck.setOnCheckedChangeListener((buttonView, isChecked) ->
-                AutoSyncService.setAutoSyncEnabled(this, isChecked)
-        );
+        autoSyncSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (AutoSyncService.getIntervalMinutes(MainActivity.this) != intervals[position]) {
+                    AutoSyncService.setIntervalMinutes(MainActivity.this, intervals[position]);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
         manualSyncButton.setOnClickListener(v -> SvConnectService.upload(this));
 
         dialog.show();

@@ -76,6 +76,8 @@ public class SvConnectService {
             return;
         }
 
+        AutoSyncService.recordSyncStarted(appContext);
+
         // 未送信、または写真同期に必要なサーバーIDを持たないデータを先に同期する
         String ownerPublicId = UserDataScope.getCurrentPublicId(appContext);
         Log.d(TAG, "Upload ownerPublicId=" + ownerPublicId);
