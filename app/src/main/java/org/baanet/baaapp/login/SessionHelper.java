@@ -19,6 +19,7 @@ public final class SessionHelper {
                 .remove("public_id")
                 .remove("last_auto_sync_at")
                 .apply();
+        // Started syncs retain their captured credentials and use a separate dispatcher.
         ApiClient.getClient().dispatcher().cancelAll();
 
         Intent intent = new Intent(activity, LoginActivity.class);

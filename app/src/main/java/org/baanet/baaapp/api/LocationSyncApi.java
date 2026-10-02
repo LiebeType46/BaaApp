@@ -46,7 +46,7 @@ public class LocationSyncApi {
         Log.d(TAG, "Location sync request method=" + request.method());
         Log.d(TAG, "Location sync request body=" + json);
 
-        ApiClient.getClient()
+        ApiClient.getSyncClient()
                 .newCall(request)
                 .enqueue(new Callback() {
                     @Override
@@ -102,7 +102,7 @@ public class LocationSyncApi {
                 + ", exists=" + photoFile.exists()
                 + ", length=" + photoFile.length());
 
-        ApiClient.getClient()
+        ApiClient.getSyncClient()
                 .newCall(request)
                 .enqueue(new Callback() {
                     @Override

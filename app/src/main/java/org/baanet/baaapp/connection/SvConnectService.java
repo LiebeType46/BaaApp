@@ -10,7 +10,6 @@ import org.baanet.baaapp.api.LocationSyncApi;
 import org.baanet.baaapp.common.LanguageService;
 import org.baanet.baaapp.data.AppDatabase;
 import org.baanet.baaapp.data.LocationEntity;
-import org.baanet.baaapp.common.UserDataScope;
 import org.baanet.baaapp.login.SessionHelper;
 import org.baanet.baaapp.sync.LocationSyncRequest;
 import org.baanet.baaapp.sync.LocationSyncResponse;
@@ -21,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SvConnectService {
@@ -76,7 +76,10 @@ public class SvConnectService {
     private static void upload(Context context, UploadCallback callback, boolean post) {
         Context appContext = context.getApplicationContext();
         LanguageService language = LanguageService.get(appContext);
-        String token = appContext.getSharedPreferences(PREF, Context.MODE_PRIVATE).getString(KEY_TOKEN, null);
+        Map<String, ?> session = appContext.getSharedPreferences(PREF, Context.MODE_PRIVATE).getAll();
+        String token = (String) session.get(KEY_TOKEN);
+        String publicId = (String) session.get("public_id");
+        String ownerPublicId = publicId == null || publicId.trim().isEmpty() ? null : publicId.trim();
         if (token == null || token.isBlank()) {
             Log.d(TAG, "Upload skipped: no login");
             callback.onError(language.t("sync.no_login"));
@@ -125,14 +128,14 @@ public class SvConnectService {
             }
         };
         try {
-            performUpload(appContext, token, guardedCallback);
+            performUpload(appContext, token, ownerPublicId, guardedCallback);
         } catch (RuntimeException e) {
             Log.e(TAG, "Upload initialization failed", e);
             guardedCallback.onError(language.format("sync.failed", e.getMessage()));
         }
     }
 
-    private static void performUpload(Context context, String token, UploadCallback callback) {
+    private static void performUpload(Context context, String token, String ownerPublicId, UploadCallback callback) {
         Context appContext = context.getApplicationContext();
         LanguageService language = LanguageService.get(appContext);
         Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -144,7 +147,6 @@ public class SvConnectService {
         AutoSyncService.recordSyncStarted(appContext);
 
         // 未送信、または写真同期に必要なサーバーIDを持たないデータを先に同期する
-        String ownerPublicId = UserDataScope.getCurrentPublicId(appContext);
         Log.d(TAG, "Upload ownerPublicId=" + ownerPublicId);
         List<LocationEntity> unuploadedLocations = ownerPublicId != null
                 ? db.locationDao().getLocationsNeedingServerSyncByOwner(ownerPublicId)
@@ -170,10 +172,6 @@ public class SvConnectService {
             @Override
             public void onSuccess(LocationSyncResponse response) {
                 mainHandler.post(() -> {
-                    if (!SessionHelper.isCurrentToken(appContext, token)) {
-                        callback.onError(language.t("sync.no_login"));
-                        return;
-                    }
                     if (response == null || !response.isOk() || response.uploadedLocations == null) {
                         Log.w(TAG, "Upload failed: invalid success response");
                         callback.onError(language.format("sync.failed", ""));
@@ -263,10 +261,6 @@ public class SvConnectService {
             LanguageService language,
             int uploadedLocationCount
     ) {
-        if (!SessionHelper.isCurrentToken(appContext, token)) {
-            callback.onError(language.t("sync.no_login"));
-            return;
-        }
         if (index >= pendingPhotos.size()) {
             Log.d(TAG, "Photo upload finished success=" + summary.successCount + ", failed=" + summary.failedCount);
             callback.onComplete(uploadedLocationCount, summary.successCount, summary.failedCount);
@@ -298,10 +292,6 @@ public class SvConnectService {
             @Override
             public void onSuccess(String responseBody) {
                 mainHandler.post(() -> {
-                    if (!SessionHelper.isCurrentToken(appContext, token)) {
-                        callback.onError(language.t("sync.no_login"));
-                        return;
-                    }
                     Log.d(TAG, "Photo upload succeeded localId=" + location.getId()
                             + ", serverLocationId=" + serverLocationId);
                     db.locationDao().markPhotoUploaded(location.getId());
@@ -365,10 +355,6 @@ public class SvConnectService {
             LocationEntity location,
             String error
     ) {
-        if (!SessionHelper.isCurrentToken(appContext, token)) {
-            callback.onError(language.t("sync.no_login"));
-            return;
-        }
         Log.w(TAG, "Photo upload failed localId=" + location.getId()
                 + ", attempt=" + attempt + "/" + PHOTO_UPLOAD_MAX_ATTEMPTS
                 + ", error=" + error);
