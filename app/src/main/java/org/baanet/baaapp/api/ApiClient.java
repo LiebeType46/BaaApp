@@ -7,7 +7,7 @@ public class ApiClient {
 
     private static final OkHttpClient client = new OkHttpClient();
     // Keep logout cancellation separate while sharing the connection pool and HTTP settings.
-    private static final OkHttpClient syncClient = client.newBuilder()
+    private static volatile OkHttpClient syncClient = client.newBuilder()
             .dispatcher(new Dispatcher())
             .build();
 
@@ -17,5 +17,9 @@ public class ApiClient {
 
     public static OkHttpClient getSyncClient() {
         return syncClient;
+    }
+
+    static void setSyncClientForTesting(OkHttpClient replacement) {
+        syncClient = replacement;
     }
 }
